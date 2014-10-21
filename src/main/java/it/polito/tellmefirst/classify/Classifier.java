@@ -32,13 +32,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import it.polito.tellmefirst.apimanager.ImageManager;
 import it.polito.tellmefirst.classify.threads.ClassiThread;
-import it.polito.tellmefirst.lodmanager.DBpediaManager;
-import it.polito.tellmefirst.parsing.DOCparser;
-import it.polito.tellmefirst.parsing.HTMLparser;
-import it.polito.tellmefirst.parsing.PDFparser;
-import it.polito.tellmefirst.parsing.TXTparser;
 import it.polito.tellmefirst.lucene.LuceneManager;
 import java.io.File;
 import java.io.IOException;
@@ -51,15 +45,12 @@ import java.util.*;
 public class Classifier {
 
     LuceneManager contextLuceneManager;
-    ImageManager imageManager;
-    DBpediaManager dBpediaManager;
     SimpleSearcher searcher;
     static Log LOG = LogFactory.getLog(Classifier.class);
 
     public Classifier(String lang) {
         LOG.debug("[constructor] - BEGIN");
         try{
-            imageManager = new ImageManager();
             if(lang.equals("it")){
                 LOG.info("[Initializing italian Classifier...");
                 searcher = IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
@@ -79,39 +70,10 @@ public class Classifier {
     public ArrayList<String[]> classify(String inputText, File file, String url, String fileName, int numOfTopics,
                                         String lang) throws TMFVisibleException {
         LOG.debug("[classify] - BEGIN");
-        // check if DBpedia endpoints are up
-        dBpediaManager = new DBpediaManager();
-        if (!lang.equals("italian") && !dBpediaManager.isDBpediaEnglishUp()){
-            //comment for local use
-            throw new TMFVisibleException("DBpedia English service seems to be down, so TellMeFirs can't work " +
-                    "properly. Please try later!");
-        } else {
-            if (lang.equals("italian") && !dBpediaManager.isDBpediaItalianUp()){
-                //comment for local use
-                throw new TMFVisibleException("DBpedia Italian service seems to be down, so TellMeFirs can't work" +
-                        " properly. Please try later!");
-            }
-        }
         ArrayList<String[]> result;
         Text text;
         if (inputText != null && !inputText.equals("")){
             text = new Text(inputText);
-        } else if (url != null){
-            HTMLparser parser = new HTMLparser();
-            text = new Text(parser.htmlToTextGoose(url));
-        } else if(file != null){
-            if(fileName.endsWith(".pdf") || fileName.endsWith(".PDF")){
-                PDFparser parser = new PDFparser();
-                text = new Text(parser.pdfToText(file));
-            } else if(fileName.endsWith(".doc") || fileName.endsWith(".DOC")){
-                DOCparser parser = new DOCparser();
-                text = new Text(parser.docToText(file));
-            } else if(fileName.endsWith(".txt") || fileName.endsWith(".TXT")){
-                TXTparser parser = new TXTparser();
-                text = new Text(parser.txtToText(file));
-            } else {
-                throw new TMFVisibleException("File extension not valid: only 'pdf', 'doc' and 'txt' allowed.");
-            }
         } else {
             throw new TMFVisibleException("No valid parameters in your request: both 'text' and 'url' and 'file'" +
                     " are null.");
@@ -196,7 +158,6 @@ public class Classifier {
         HashMap<Integer,Integer> sortedMap = TMFUtils.sortHashMapIntegers(scoreDocCount);
         LinkedHashMap<ScoreDoc, Integer> sortedMapWithScore = new LinkedHashMap<ScoreDoc, Integer>();
         for(int docnum : sortedMap.keySet()){
-            Document doc = searcher.getFullDocument(docnum);
             boolean flag = true;
             for(ScoreDoc sdoc : mergedHitList){
                 if(flag && sdoc.doc == docnum){
@@ -257,24 +218,11 @@ public class Classifier {
                             typesString.append(value.stringValue()+"#");
                         }
                         mergedTypes = typesString.toString();
-                        if(doc.getField("IMAGE") != null){
-                            String dirtyImage = doc.getField("IMAGE").stringValue();
-                            // we scrape anyway, even when the image URL is in DBpedia, to have always the right size
-                            String[] fileNameSplit = dirtyImage.replace(" ","_").split("/");
-                            image = imageManager.scrapeDBpediaImageFromPage("http://it.wikipedia.org/wiki/File:"+
-                                    fileNameSplit[fileNameSplit.length-1]);
-
-                        }
                         // Italian flag, resource with a corresponding in English DBpedia
                     } else {
                         uri = doc.getField("SAMEAS").stringValue();
                         title = IndexesUtil.getTitle(uri, "en");
                         visLabel = doc.getField("TITLE").stringValue().replaceAll("\\(.+?\\)", "").trim();;
-                        String dirtyImage = IndexesUtil.getImage(uri, "en");
-                        // we scrape anyway, even when the image URL is in DBpedia, to have always the right size
-                        String[] fileNameSplit = dirtyImage.replace(" ","_").split("/");
-                        image = imageManager.scrapeDBpediaImageFromPage("http://en.wikipedia.org/wiki/File:"+
-                                fileNameSplit[fileNameSplit.length-1]);
                         ArrayList<String> typesArray = IndexesUtil.getTypes(uri, "en");
                         StringBuilder typesString = new StringBuilder();
                         for (String type : typesArray) {
@@ -287,13 +235,6 @@ public class Classifier {
                     uri= "http://dbpedia.org/resource/" + doc.getField("URI").stringValue();
                     title = doc.getField("TITLE").stringValue();
                     visLabel = title.replaceAll("\\(.+?\\)", "").trim();
-                    if(doc.getField("IMAGE") != null){
-                        String dirtyImage = doc.getField("IMAGE").stringValue();
-                        // we scrape anyway, even when the image URL is in DBpedia, to have always the right size
-                        String[] fileNameSplit = dirtyImage.replace(" ","_").split("/");
-                        image = imageManager.scrapeDBpediaImageFromPage("http://en.wikipedia.org/wiki/File:"+
-                                fileNameSplit[fileNameSplit.length-1]);
-                    }
                     Field[] types = doc.getFields("TYPE");
                     StringBuilder typesString = new StringBuilder();
                     for (Field value : types) {
