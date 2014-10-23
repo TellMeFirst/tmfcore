@@ -23,7 +23,7 @@ package it.polito.tellmefirst.exception;
  * Created by IntelliJ IDEA.
  * User: Federico Cairo
  */
-public class TMFVisibleException extends Exception {
+public class TMFVisibleException extends RuntimeException {
 
     // massage is directly visualized in the GUI
     public TMFVisibleException(String s){

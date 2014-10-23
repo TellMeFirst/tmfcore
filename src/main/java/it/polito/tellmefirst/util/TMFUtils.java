@@ -21,13 +21,10 @@ package it.polito.tellmefirst.util;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import java.io.*;
 import java.util.*;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Federico Cairo
- */
 public class TMFUtils {
 
     static Log LOG = LogFactory.getLog(TMFUtils.class);
@@ -79,11 +76,65 @@ public class TMFUtils {
         return sortedMap;
     }
 
-
     public static int countWords(String in) {
         LOG.debug("[countWords] - BEGIN");
         String[] words = in.split(" ");
         LOG.debug("[countWords] - END");
         return words.length;
     }
+    
+    public static void optional(Behaviour b, String warning){
+		try{
+			b.behaviour();
+		}catch(Exception e){
+			LOG.warn(warning);
+		}
+	}
+    
+    public static <T> T optional(Ret<T> ret, T defaultValue){
+    	T returnValue=null;
+    	try{
+			returnValue = ret.ret();
+		}catch(Exception e){
+			LOG.warn(e);
+		}
+    	if(returnValue == null) returnValue = defaultValue;
+    	return returnValue;
+    }
+    
+    public static <T> T unchecked(Ret<T> ret, T defaultValue){
+    	T returnValue=null;
+    	try{
+			returnValue = ret.ret();
+		}catch(Exception e){
+			throw new RuntimeException(e);
+		}
+    	if(returnValue == null) returnValue = defaultValue;
+    	return returnValue;
+    }
+    
+    public static <T> T optional(Ret<T> ret){
+    	return optional(ret, null);
+    }
+    
+    public static <T> T unchecked(Ret<T> ret){
+    	return unchecked(ret, null);
+    }
+    
+    public static <T> T uncheck(Ret<T> ret, T defaultValue){
+    	return unchecked(ret, defaultValue);
+    }
+    
+    public static String getFileExtension(String fileName){
+    	String [] splat = fileName.split(".");
+    	return splat[splat.length-1];
+    }
+    
+    public static boolean hasContent(String string){
+    	return string!=null && !string.isEmpty();
+    }
+    public static boolean hasNoContent(String string){
+    	return !hasContent(string);
+    }
+    
 }
