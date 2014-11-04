@@ -19,17 +19,20 @@
 
 package it.polito.tellmefirst.classify;
 
+import it.polito.tellmefirst.classify.threads.ClassiThread;
 import it.polito.tellmefirst.exception.TMFVisibleException;
 import it.polito.tellmefirst.lucene.IndexesUtil;
+import it.polito.tellmefirst.lucene.LuceneManager;
 import it.polito.tellmefirst.lucene.SimpleSearcher;
 import it.polito.tellmefirst.util.TMFUtils;
-
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Optional;
+import static java.util.Optional.ofNullable;
 import java.util.TreeMap;
-
 import org.apache.commons.collections.map.LinkedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -39,9 +42,6 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
-import it.polito.tellmefirst.classify.threads.ClassiThread;
-import it.polito.tellmefirst.lucene.LuceneManager;
-import java.io.IOException;
 
 public class Classifier {
 
@@ -215,8 +215,7 @@ public class Classifier {
 				String visLabel = "";
 				String title = "";
 				String mergedTypes = "";
-				// String image = "";
-				String dirtyImage = "";
+				String image;
 				String wikilink = "";
 
 				if (lang.equals("italian")) {
@@ -225,8 +224,7 @@ public class Classifier {
 					wikilink = "http://it.wikipedia.org/wiki/"
 							+ doc.getField("URI").stringValue();
 
-					// Italian flag, resource without a corresponding in English
-					// DBpedia
+					// Italian: resource without a corresponding in English DBpedia
 					if (doc.getField("SAMEAS") == null) {
 						uri = italianUri;
 						title = doc.getField("TITLE").stringValue();
@@ -237,12 +235,23 @@ public class Classifier {
 							typesString.append(value.stringValue() + "#");
 						}
 						mergedTypes = typesString.toString();
-						// Italian flag, resource with a corresponding in English DBpedia
+						image = ofNullable(doc.getField("IMAGE"))
+								.flatMap(y -> ofNullable(y.stringValue()))
+								.orElse("");
+
+					//
+					// Italian: resource with a corresponding in English DBpedia.
+					//
+					// Note: in this case we use getImage() to get the image URL, rather
+					// than the "IMAGE" field, under the assumption that the english
+					// version of DBPedia is more rich.
+					//
 					} else {
 						uri = doc.getField("SAMEAS").stringValue();
 						title = IndexesUtil.getTitle(uri, "en");
 						visLabel = doc.getField("TITLE").stringValue()
 								.replaceAll("\\(.+?\\)", "").trim();
+						image = IndexesUtil.getImage(uri, "en");
 						ArrayList<String> typesArray = IndexesUtil.getTypes(uri, "en");
 						StringBuilder typesString = new StringBuilder();
 						for (String type : typesArray)
@@ -250,12 +259,15 @@ public class Classifier {
 						mergedTypes = typesString.toString();
 					}
 
-					// English flag
+				// English
 				} else {
 					uri = "http://dbpedia.org/resource/"+doc.getField("URI").stringValue();
 					wikilink = "http://en.wikipedia.org/wiki/"+doc.getField("URI").stringValue();
 					title = doc.getField("TITLE").stringValue();
 					visLabel = title.replaceAll("\\(.+?\\)", "").trim();
+					image = ofNullable(doc.getField("IMAGE"))
+								.flatMap(y -> ofNullable(y.stringValue()))
+								.orElse("");
 					Field[] types = doc.getFields("TYPE");
 					StringBuilder typesString = new StringBuilder();
 					for (Field value : types) {
@@ -276,7 +288,7 @@ public class Classifier {
 				arrayOfFields[2] = title;
 				arrayOfFields[3] = score;
 				arrayOfFields[4] = mergedTypes;
-				arrayOfFields[5] = dirtyImage;
+				arrayOfFields[5] = image;
 				arrayOfFields[6] = wikilink;
 				
 
