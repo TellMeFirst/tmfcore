@@ -40,7 +40,10 @@ public class ClassiThread extends Thread {
     private String textPiece;
 
 
-    public ClassiThread(LuceneManager contextLuceneManager, SimpleSearcher simpleSearcher, String textPiece) {
+    public ClassiThread(
+			LuceneManager contextLuceneManager, 
+			SimpleSearcher simpleSearcher, 
+			String textPiece) {
         LOG.debug("[constructor] - BEGIN");
         this.contextLuceneManager = contextLuceneManager;
         this.simpleSearcher = simpleSearcher;
