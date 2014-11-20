@@ -8,18 +8,53 @@ package it.polito.tellmefirst.http;
 import it.polito.tellmefirst.classify.Classifier;
 import java.util.List;
 import static java.util.stream.Collectors.toList;
+import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.MediaType;
 
 /**
  *
  * @author RMuzzi
  */
-@Path("core/classify")
-public class ClassifyHTTPInterface {
+@ApplicationPath("core")
+@Path("classify")
+public class ClassifyHTTPInterface extends Application {
 
+	@GET
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getHW(@QueryParam("hello") @DefaultValue("Ciao!") String hello){
+		return hello;
+	}
+	
+	
+	@POST
+	@Path("test")
+	@Consumes(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.TEXT_PLAIN)
+	public String getClassifyTextPlain(String s ) {
+		List<ClassifyOutput> classifyResult = classifyCoreAdapter(new Classifier("it").classify(s,7,"it") );
+		return classifyResult
+							.stream()
+							.map((classifyOutput)->classifyOutput.toString())
+							.reduce("", String::concat);
+	}
+
+	/**
+	 * FIXME
+	 * 
+	 * This endpoint is not yes reliable. It will works when Jackson Jersey provider will be integrated.
+	 * 
+	 * @param ci ClassifyInput JSON serialized object
+	 * @return 
+	 */
 	@POST
 	@Consumes("application/json; charset=utf-8")
 	@Produces("application/json; charset=utf-8")
@@ -135,5 +170,11 @@ public class ClassifyHTTPInterface {
 		public void setWikilink(String wikilink) {
 			this.wikilink = wikilink;
 		}
+
+		@Override
+		public String toString() {
+			return "ClassifyOutput{" + "uri=" + uri + ", label=" + label + ", title=" + title + ", score=" + score + ", mergedTypes=" + mergedTypes + ", image=" + image + ", wikilink=" + wikilink + '}' +'\n';
+		}
+		
 	}
 }
