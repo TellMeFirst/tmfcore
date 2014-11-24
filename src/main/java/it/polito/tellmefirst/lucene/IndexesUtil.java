@@ -19,7 +19,6 @@
 
 package it.polito.tellmefirst.lucene;
 
-import it.polito.tellmefirst.exception.TMFIndexesWarmUpException;
 import it.polito.tellmefirst.util.TMFVariables;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,6 +32,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.MMapDirectory;
 import org.apache.lucene.util.Version;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -46,26 +46,23 @@ public class IndexesUtil {
     public static SimpleSearcher ENGLISH_CORPUS_INDEX_SEARCHER;
 
 
-    public static void indexesUtil() throws TMFIndexesWarmUpException {
+    public static void indexesUtil() throws IOException {
         LOG.debug("[constructor] - BEGIN");
-        try{
-            // build italian searcher
-            Directory contextIndexDirIT = LuceneManager.pickDirectory(new File(TMFVariables.CORPUS_INDEX_IT));
-            LOG.info("Corpus index used for italian: "+contextIndexDirIT);
-            LuceneManager contextLuceneManagerIT = new LuceneManager(contextIndexDirIT);
-            contextLuceneManagerIT.setLuceneDefaultAnalyzer(new ItalianAnalyzer(Version.LUCENE_36, TMFVariables.STOPWORDS_IT));
-            ITALIAN_CORPUS_INDEX_SEARCHER = new SimpleSearcher(contextLuceneManagerIT);
 
-            // build english searcher
-            Directory contextIndexDirEN = LuceneManager.pickDirectory(new File(TMFVariables.CORPUS_INDEX_EN));
-            LOG.info("Corpus index used for english: "+contextIndexDirEN);
-            LuceneManager contextLuceneManagerEN = new LuceneManager(contextIndexDirEN);
-            contextLuceneManagerEN.setLuceneDefaultAnalyzer(new EnglishAnalyzer(Version.LUCENE_36, TMFVariables.STOPWORDS_EN));
-            ENGLISH_CORPUS_INDEX_SEARCHER = new SimpleSearcher(contextLuceneManagerEN);
-        }catch (Exception e){
-            //exceptions are not catched here, because we want to stop TMF server
-            throw new TMFIndexesWarmUpException("Problem with setting up TMF indexes: ", e);
-        }
+        // build italian searcher
+        Directory contextIndexDirIT = LuceneManager.pickDirectory(new File(TMFVariables.CORPUS_INDEX_IT));
+        LOG.info("Corpus index used for italian: "+contextIndexDirIT);
+        LuceneManager contextLuceneManagerIT = new LuceneManager(contextIndexDirIT);
+        contextLuceneManagerIT.setLuceneDefaultAnalyzer(new ItalianAnalyzer(Version.LUCENE_36, TMFVariables.STOPWORDS_IT));
+        ITALIAN_CORPUS_INDEX_SEARCHER = new SimpleSearcher(contextLuceneManagerIT);
+
+        // build english searcher
+        Directory contextIndexDirEN = LuceneManager.pickDirectory(new File(TMFVariables.CORPUS_INDEX_EN));
+        LOG.info("Corpus index used for english: "+contextIndexDirEN);
+        LuceneManager contextLuceneManagerEN = new LuceneManager(contextIndexDirEN);
+        contextLuceneManagerEN.setLuceneDefaultAnalyzer(new EnglishAnalyzer(Version.LUCENE_36, TMFVariables.STOPWORDS_EN));
+        ENGLISH_CORPUS_INDEX_SEARCHER = new SimpleSearcher(contextLuceneManagerEN);
+
         LOG.debug("[constructor] - END");
     }
 
