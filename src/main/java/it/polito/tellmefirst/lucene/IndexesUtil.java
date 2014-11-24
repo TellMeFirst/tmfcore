@@ -46,8 +46,8 @@ public class IndexesUtil {
     public static SimpleSearcher ENGLISH_CORPUS_INDEX_SEARCHER;
 
 
-    public static void indexesUtil() throws IOException {
-        LOG.debug("[constructor] - BEGIN");
+    public static void init() throws IOException {
+        LOG.debug("[initializator] - BEGIN");
 
         // build italian searcher
         Directory contextIndexDirIT = LuceneManager.pickDirectory(new File(TMFVariables.CORPUS_INDEX_IT));
@@ -63,7 +63,7 @@ public class IndexesUtil {
         contextLuceneManagerEN.setLuceneDefaultAnalyzer(new EnglishAnalyzer(Version.LUCENE_36, TMFVariables.STOPWORDS_EN));
         ENGLISH_CORPUS_INDEX_SEARCHER = new SimpleSearcher(contextLuceneManagerEN);
 
-        LOG.debug("[constructor] - END");
+        LOG.debug("[initializator] - END");
     }
 
 
