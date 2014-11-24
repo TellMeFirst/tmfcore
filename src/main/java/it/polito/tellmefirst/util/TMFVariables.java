@@ -19,7 +19,6 @@
 
 package it.polito.tellmefirst.util;
 
-import it.polito.tellmefirst.exception.TMFConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.io.File;
@@ -50,26 +49,23 @@ public class TMFVariables {
     public static Set<String> STOPWORDS_EN;
 
 
-    public TMFVariables(String confFile) throws TMFConfigurationException {
+    public TMFVariables(String confFile) throws IOException {
         LOG.debug("[constructor] - BEGIN");
         Properties config = new Properties();
-        try {
-            config.load(new FileInputStream(new File(confFile)));
-            restURL = config.getProperty("rest.service.url", "").trim();
 
-            CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
-            KB_IT = config.getProperty("kb.it", "").trim();
-            RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
-            STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
+        config.load(new FileInputStream(new File(confFile)));
+        restURL = config.getProperty("rest.service.url", "").trim();
 
-            CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
-            KB_EN = config.getProperty("kb.en", "").trim();
-            RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
-            STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
-        } catch (IOException e) {
-            //exceptions are not catched here, because we want to stop TMF server
-            throw new TMFConfigurationException("Problem with configuring initial parameters: ", e);
-        }
+        CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
+        KB_IT = config.getProperty("kb.it", "").trim();
+        RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
+        STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
+
+        CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
+        KB_EN = config.getProperty("kb.en", "").trim();
+        RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
+        STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
+
         LOG.debug("[constructor] - END");
     }
 
