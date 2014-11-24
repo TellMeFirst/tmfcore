@@ -1,7 +1,7 @@
-/**
- * TellMeFirst - A Knowledge Discovery Application
+/*-
+ * TellMeFirst - A Knowledge Discovery Application.
  *
- * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto
+ * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
