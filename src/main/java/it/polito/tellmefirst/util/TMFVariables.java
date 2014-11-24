@@ -36,8 +36,6 @@ public class TMFVariables {
 
     static Log LOG = LogFactory.getLog(TMFVariables.class);
 
-    private String restURL;
-
     public static String CORPUS_INDEX_IT;
     public static String KB_IT;
     public static String RESIDUAL_KB_IT;
@@ -54,8 +52,6 @@ public class TMFVariables {
         Properties config = new Properties();
 
         config.load(new FileInputStream(new File(confFile)));
-        restURL = config.getProperty("rest.service.url", "").trim();
-
         CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
         KB_IT = config.getProperty("kb.it", "").trim();
         RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
@@ -67,10 +63,5 @@ public class TMFVariables {
         STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
 
         LOG.debug("[constructor] - END");
-    }
-
-
-    public String getRestURL() {
-        return restURL;
     }
 }
