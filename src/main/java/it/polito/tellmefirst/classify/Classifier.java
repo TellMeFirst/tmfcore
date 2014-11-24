@@ -20,7 +20,6 @@
 package it.polito.tellmefirst.classify;
 
 import it.polito.tellmefirst.classify.threads.ClassiThread;
-import it.polito.tellmefirst.exception.TMFVisibleException;
 import it.polito.tellmefirst.lucene.IndexesUtil;
 import it.polito.tellmefirst.lucene.LuceneManager;
 import it.polito.tellmefirst.lucene.SimpleSearcher;
@@ -68,7 +67,8 @@ public class Classifier {
 	}
 
 	public ArrayList<String[]> classify(String textString, int numOfTopics,
-			String lang) throws TMFVisibleException {
+			String lang) throws InterruptedException, IOException,
+			ParseException {
 		LOG.debug("[classify] - BEGIN");
 
 		ArrayList<String[]> result;
@@ -77,22 +77,16 @@ public class Classifier {
 		int totalNumWords = TMFUtils.countWords(textString);
 		// no prod
 		LOG.debug("TOTAL WORDS: " + totalNumWords);
-		try {
-			if (totalNumWords > 1000) {
-				// no prod
-				LOG.debug("Text contains " + totalNumWords
-						+ " words. We'll use Classify for long texts.");
-				result = classifyLongText(text, numOfTopics, lang);
-			} else {
-				// no prod
-				LOG.debug("Text contains " + totalNumWords
-						+ " words. We'll use Classify for short texts.");
-				result = classifyShortText(text, numOfTopics, lang);
-			}
-		} catch (Exception e) {
-			LOG.error("[classify] - EXCEPTION: ", e);
-			throw new TMFVisibleException(
-					"Unable to extract topics from specified text.");
+		if (totalNumWords > 1000) {
+			// no prod
+			LOG.debug("Text contains " + totalNumWords
+					+ " words. We'll use Classify for long texts.");
+			result = classifyLongText(text, numOfTopics, lang);
+		} else {
+			// no prod
+			LOG.debug("Text contains " + totalNumWords
+					+ " words. We'll use Classify for short texts.");
+			result = classifyShortText(text, numOfTopics, lang);
 		}
 		LOG.debug("[classify] - END");
 
