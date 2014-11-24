@@ -19,6 +19,9 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import org.apache.lucene.queryParser.ParseException;
+import java.io.IOException;
+
 
 /**
  *
@@ -39,7 +42,8 @@ public class ClassifyHTTPInterface extends Application {
 	@Path("test")
 	@Consumes(MediaType.TEXT_PLAIN)
 	@Produces(MediaType.TEXT_PLAIN)
-	public String getClassifyTextPlain(String s ) {
+	public String getClassifyTextPlain(String s) throws InterruptedException,
+			IOException, ParseException {
 		List<ClassifyOutput> classifyResult = classifyCoreAdapter(new Classifier("it").classify(s,7,"it") );
 		return classifyResult
 							.stream()
@@ -58,7 +62,8 @@ public class ClassifyHTTPInterface extends Application {
 	@POST
 	@Consumes("application/json; charset=utf-8")
 	@Produces("application/json; charset=utf-8")
-	public List<ClassifyOutput> getClassifyText(ClassifyInput ci ) {
+	public List<ClassifyOutput> getClassifyText(ClassifyInput ci )
+			throws InterruptedException, IOException, ParseException {
 		return classifyCoreAdapter(
 			new Classifier(ci.getLang()).classify(
 				ci.getText(),

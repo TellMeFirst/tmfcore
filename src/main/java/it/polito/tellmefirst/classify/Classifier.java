@@ -1,7 +1,7 @@
-/**
- * TellMeFirst - A Knowledge Discovery Application
+/*-
+ * TellMeFirst - A Knowledge Discovery Application.
  *
- * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto
+ * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@
 package it.polito.tellmefirst.classify;
 
 import it.polito.tellmefirst.classify.threads.ClassiThread;
-import it.polito.tellmefirst.exception.TMFVisibleException;
 import it.polito.tellmefirst.lucene.IndexesUtil;
 import it.polito.tellmefirst.lucene.LuceneManager;
 import it.polito.tellmefirst.lucene.SimpleSearcher;
@@ -51,24 +50,20 @@ public class Classifier {
 
 	public Classifier(String lang) {
 		LOG.debug("[constructor] - BEGIN");
-		try {
-			if (lang.equals("it")) {
-				LOG.info("[Initializing italian Classifier...");
-				searcher = IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
-			} else {
-				LOG.info("[Initializing english Classifier...");
-				searcher = IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
-			}
-			contextLuceneManager = searcher.getLuceneManager();
-			
-		} catch (Exception e) {
-			LOG.error("[constructor] - EXCEPTION: ", e);
+		if (lang.equals("it")) {
+			LOG.info("Initializing italian Classifier...");
+			searcher = IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
+		} else {
+			LOG.info("Initializing english Classifier...");
+			searcher = IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
 		}
+		contextLuceneManager = searcher.getLuceneManager();
 		LOG.debug("[constructor] - END");
 	}
 
 	public ArrayList<String[]> classify(String textString, int numOfTopics,
-			String lang) throws TMFVisibleException {
+			String lang) throws InterruptedException, IOException,
+			ParseException {
 		LOG.debug("[classify] - BEGIN");
 
 		ArrayList<String[]> result;
@@ -77,25 +72,16 @@ public class Classifier {
 		int totalNumWords = TMFUtils.countWords(textString);
 		// no prod
 		LOG.debug("TOTAL WORDS: " + totalNumWords);
-		if (totalNumWords > 30000) {
-			throw new TMFVisibleException("This is just a demo. Try with a text containing less than 30.000 words!");
-		}
-		try {
-			if (totalNumWords > 1000) {
-				// no prod
-				LOG.debug("Text contains " + totalNumWords
-						+ " words. We'll use Classify for long texts.");
-				result = classifyLongText(text, numOfTopics, lang);
-			} else {
-				// no prod
-				LOG.debug("Text contains " + totalNumWords
-						+ " words. We'll use Classify for short texts.");
-				result = classifyShortText(text, numOfTopics, lang);
-			}
-		} catch (Exception e) {
-			LOG.error("[classify] - EXCEPTION: ", e);
-			throw new TMFVisibleException(
-					"Unable to extract topics from specified text.");
+		if (totalNumWords > 1000) {
+			// no prod
+			LOG.debug("Text contains " + totalNumWords
+					+ " words. We'll use Classify for long texts.");
+			result = classifyLongText(text, numOfTopics, lang);
+		} else {
+			// no prod
+			LOG.debug("Text contains " + totalNumWords
+					+ " words. We'll use Classify for short texts.");
+			result = classifyShortText(text, numOfTopics, lang);
 		}
 		LOG.debug("[classify] - END");
 

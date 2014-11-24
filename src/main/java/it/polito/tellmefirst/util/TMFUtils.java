@@ -29,19 +29,18 @@ public class TMFUtils {
 
     static Log LOG = LogFactory.getLog(TMFUtils.class);
 
-    public static Set<String> getStopWords(String stopwordsFilePath) {
+    public static Set<String> getStopWords(String stopwordsFilePath)
+			throws IOException {
         LOG.debug("[getStopWords] - BEGIN");
         ArrayList<String> stopWordsList = new ArrayList<String>();
-        try {
-            BufferedReader bufferedReader = new BufferedReader(new FileReader(stopwordsFilePath));
-            String line = null;
-            while ((line = bufferedReader.readLine()) != null) {
-                stopWordsList.add(line.trim());
-            }
-            bufferedReader.close();
-        } catch (Exception e) {
-            LOG.error("Could not read stopwords file at location: " + stopwordsFilePath);
+
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(stopwordsFilePath));
+        String line = null;
+        while ((line = bufferedReader.readLine()) != null) {
+            stopWordsList.add(line.trim());
         }
+        bufferedReader.close();
+
         Set<String> stopwordsSet = new HashSet<String>(stopWordsList);
         LOG.debug("[getStopWords] - END");
         return stopwordsSet;
