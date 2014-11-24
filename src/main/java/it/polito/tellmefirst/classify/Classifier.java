@@ -77,9 +77,6 @@ public class Classifier {
 		int totalNumWords = TMFUtils.countWords(textString);
 		// no prod
 		LOG.debug("TOTAL WORDS: " + totalNumWords);
-		if (totalNumWords > 30000) {
-			throw new TMFVisibleException("This is just a demo. Try with a text containing less than 30.000 words!");
-		}
 		try {
 			if (totalNumWords > 1000) {
 				// no prod
