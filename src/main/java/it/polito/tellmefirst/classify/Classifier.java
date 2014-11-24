@@ -50,19 +50,14 @@ public class Classifier {
 
 	public Classifier(String lang) {
 		LOG.debug("[constructor] - BEGIN");
-		try {
-			if (lang.equals("it")) {
-				LOG.info("[Initializing italian Classifier...");
-				searcher = IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
-			} else {
-				LOG.info("[Initializing english Classifier...");
-				searcher = IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
-			}
-			contextLuceneManager = searcher.getLuceneManager();
-			
-		} catch (Exception e) {
-			LOG.error("[constructor] - EXCEPTION: ", e);
+		if (lang.equals("it")) {
+			LOG.info("[Initializing italian Classifier...");
+			searcher = IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
+		} else {
+			LOG.info("[Initializing english Classifier...");
+			searcher = IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
 		}
+		contextLuceneManager = searcher.getLuceneManager();
 		LOG.debug("[constructor] - END");
 	}
 
