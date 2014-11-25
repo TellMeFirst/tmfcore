@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import java.util.TreeMap;
@@ -164,6 +165,29 @@ public class Classifier {
 		result = classifyCore(hits, numOfTopics, lang);
 		LOG.debug("[classifyLongText] - END");
 		return result;
+	}
+
+	/**
+	 * Classify a short piece of text. This function is used to bypass
+	 * the policy by which TMF triggers the long or the short classification
+	 * process depending on the text length. Note that if the text passed
+	 * to this function is too long, lucene may throw an exception.
+	 *
+	 * @param textString the input piece of text.
+	 * @param numOfTopics maximum number of topics to be returned (less
+	 *        topics may be returned.
+	 * @param lang the classifier language (yes, this argument is
+	 *        redundant and will be removed in the future).
+	 * @return A list of vectors of strings. Each vector shall be composed
+	 *         of seven strings: the URI, the label, the title, the
+	 *         score, the merged type, the image, and the wiki link.
+	 *
+	 * @since 2.0.0.0.
+	 */
+	public List<String[]> classifyShortText(String textString,
+			int numOfTopics, String lang) throws InterruptedException,
+			IOException, ParseException {
+		return classifyShortText(new Text(textString), numOfTopics, lang);
 	}
 
 	public ArrayList<String[]> classifyShortText(Text text, int numOfTopics,
