@@ -136,7 +136,7 @@ public class Classifier {
 			thread.join();
 			ScoreDoc[] hits = thread.getHits();
 			ArrayList<ScoreDoc> hitList = new ArrayList<ScoreDoc>();
-			for (int b = 0; b < numOfTopics; b++) {
+			for (int b = 0; b < numOfTopics && b < hits.length; b++) {
 				hitList.add(hits[b]);
 			}
 			mergedHitList.addAll(hitList);
