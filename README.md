@@ -27,6 +27,9 @@ Use the API exported by this module as follows:
     // divided in chunks classified separately, and the result is generated
     // merging the classification of each chunk of text.
     //
+    // Here `text` is a String, `numTopics` is a integer and `language`
+    // is again a String.
+    //
     Classifier classifier = new Classifier(language);
     List<String[]> res = classifier.classify(text, numTopics, language);
 
