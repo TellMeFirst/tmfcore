@@ -20,9 +20,24 @@ Use the API exported by this module as follows:
     TMFVariables variables = new TMFVariables("/path/to/config/file");
     IndexesUtil.init();
 
-    // Classify
+    //
+    // Invoke this to classify text.
+    //
+    // This is the traditional TMF algorithm by which large texts are
+    // divided in chunks classified separately, and the result is generated
+    // merging the classification of each chunk of text.
+    //
     Classifier classifier = new Classifier(language);
     List<String[]> res = classifier.classify(text, numTopics, language);
+
+    //
+    // Alternatively, use classifySmallText to bypass the above policy and
+    // be sure that the whole text is passed to lucene (which, depending on
+    // the text size, may not like it and throw an exception).
+    //
+    Classifier classifier = new Classifier(language);
+    List<String[]> res = classifier.classifySmallText(text,
+                                  numTopics, language);
 
 See also how the API is used by [tmfcore_build_cli](https://github.com/bassosimone/tmfcore_build_cli/blob/master/tmfcore_cli/src/main/java/it/polito/tellmefirst/cli/TMFCoreCli.java) and by
 [tmfcore_build_war](https://github.com/bassosimone/tmfcore_build_war/blob/master/tmfcore_jaxrs/src/main/java/it/polito/tellmefirst/jaxrs/ClassifyResource.java).
