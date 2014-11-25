@@ -24,4 +24,5 @@ Use the API exported by this module as follows:
     Classifier classifier = new Classifier(language);
     List<String[]> res = classifier.classify(text, numTopics, language);
 
-See also how the API is used by the modules using TMF's core.
+See also how the API is used by [tmfcore_build_cli](https://github.com/bassosimone/tmfcore_build_cli/blob/master/tmfcore_cli/src/main/java/it/polito/tellmefirst/cli/TMFCoreCli.java) and by
+[tmfcore_build_war](https://github.com/bassosimone/tmfcore_build_war/blob/master/tmfcore_jaxrs/src/main/java/it/polito/tellmefirst/jaxrs/ClassifyResource.java).
