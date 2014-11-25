@@ -1,6 +1,4 @@
 /*-
- * TellMeFirst - A Knowledge Discovery Application.
- *
  * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +14,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package it.polito.tellmefirst.classify;
 
 import it.polito.tellmefirst.classify.threads.ClassiThread;
@@ -187,7 +184,7 @@ public class Classifier {
 		LOG.debug("[classifyCore] - BEGIN");
 
 		ArrayList<String[]> result = new ArrayList<String[]>();
-		
+
 		if (hits.length == 0) {
 			LOG.error("No results given by Lucene query from Classify!!");
 		} else {
@@ -226,12 +223,12 @@ public class Classifier {
 								.orElse("");
 
 					//
-					// Italian: resource with a corresponding in English DBpedia.
-					//
-					// Note: in this case we use getImage() to get the image URL, rather
-					// than the "IMAGE" field, under the assumption that the english
-					// version of DBPedia is more rich.
-					//
+						// Italian: resource with a corresponding in English DBpedia.
+						//
+						// Note: in this case we use getImage() to get the image URL, rather
+						// than the "IMAGE" field, under the assumption that the english
+						// version of DBPedia is more rich.
+						//
 					} else {
 						uri = doc.getField("SAMEAS").stringValue();
 						title = IndexesUtil.getTitle(uri, "en");
@@ -240,20 +237,21 @@ public class Classifier {
 						image = IndexesUtil.getImage(uri, "en");
 						ArrayList<String> typesArray = IndexesUtil.getTypes(uri, "en");
 						StringBuilder typesString = new StringBuilder();
-						for (String type : typesArray)
+						for (String type : typesArray) {
 							typesString.append(type + "#");
+						}
 						mergedTypes = typesString.toString();
 					}
 
-				// English
+					// English
 				} else {
-					uri = "http://dbpedia.org/resource/"+doc.getField("URI").stringValue();
-					wikilink = "http://en.wikipedia.org/wiki/"+doc.getField("URI").stringValue();
+					uri = "http://dbpedia.org/resource/" + doc.getField("URI").stringValue();
+					wikilink = "http://en.wikipedia.org/wiki/" + doc.getField("URI").stringValue();
 					title = doc.getField("TITLE").stringValue();
 					visLabel = title.replaceAll("\\(.+?\\)", "").trim();
 					image = ofNullable(doc.getField("IMAGE"))
-								.flatMap(y -> ofNullable(y.stringValue()))
-								.orElse("");
+							.flatMap(y -> ofNullable(y.stringValue()))
+							.orElse("");
 					Field[] types = doc.getFields("TYPE");
 					StringBuilder typesString = new StringBuilder();
 					for (Field value : types) {
@@ -276,7 +274,6 @@ public class Classifier {
 				arrayOfFields[4] = mergedTypes;
 				arrayOfFields[5] = image;
 				arrayOfFields[6] = wikilink;
-				
 
 				result.add(arrayOfFields);
 			}
@@ -307,5 +304,5 @@ public class Classifier {
 		LOG.debug("[sortByRank] - END");
 		return result;
 	}
-	
+
 }

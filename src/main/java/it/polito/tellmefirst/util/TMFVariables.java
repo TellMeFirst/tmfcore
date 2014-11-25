@@ -1,6 +1,4 @@
-/**
- * TellMeFirst - A Knowledge Discovery Application
- *
+/*-
  * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto
  *
  * This program is free software: you can redistribute it and/or modify
@@ -16,7 +14,6 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package it.polito.tellmefirst.util;
 
 import org.apache.commons.logging.Log;
@@ -27,41 +24,35 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.Set;
 
-/**
- * Created by IntelliJ IDEA.
- *
- * User: Federico Cairo
- */
 public class TMFVariables {
 
-    static Log LOG = LogFactory.getLog(TMFVariables.class);
+	static Log LOG = LogFactory.getLog(TMFVariables.class);
 
-    public static String CORPUS_INDEX_IT;
-    public static String KB_IT;
-    public static String RESIDUAL_KB_IT;
-    public static Set<String> STOPWORDS_IT;
+	public static String CORPUS_INDEX_IT;
+	public static String KB_IT;
+	public static String RESIDUAL_KB_IT;
+	public static Set<String> STOPWORDS_IT;
 
-    public static String CORPUS_INDEX_EN;
-    public static String KB_EN;
-    public static String RESIDUAL_KB_EN;
-    public static Set<String> STOPWORDS_EN;
+	public static String CORPUS_INDEX_EN;
+	public static String KB_EN;
+	public static String RESIDUAL_KB_EN;
+	public static Set<String> STOPWORDS_EN;
 
+	public TMFVariables(String confFile) throws IOException {
+		LOG.debug("[constructor] - BEGIN");
+		Properties config = new Properties();
 
-    public TMFVariables(String confFile) throws IOException {
-        LOG.debug("[constructor] - BEGIN");
-        Properties config = new Properties();
+		config.load(new FileInputStream(new File(confFile)));
+		CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
+		KB_IT = config.getProperty("kb.it", "").trim();
+		RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
+		STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
 
-        config.load(new FileInputStream(new File(confFile)));
-        CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
-        KB_IT = config.getProperty("kb.it", "").trim();
-        RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
-        STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
+		CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
+		KB_EN = config.getProperty("kb.en", "").trim();
+		RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
+		STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
 
-        CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
-        KB_EN = config.getProperty("kb.en", "").trim();
-        RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
-        STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
-
-        LOG.debug("[constructor] - END");
-    }
+		LOG.debug("[constructor] - END");
+	}
 }
