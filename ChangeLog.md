@@ -6,6 +6,13 @@ v2.0.0.0 (Tue, 25 Nov 2014)
 
 * Add custom `pom.xml` file, curate the tree and reindent code.
 
+* Removed any limit on the text size (so the legacy TMF should probably
+  wrap calls to `classify()` to enforce some upper bound).
+
+* Removed TMFVisibleException as well as other exception wrappers (so the
+  legacy TMF should probably wrap calls to `classify()` to make sure that
+  visible exceptions are generated when needed).
+
 * Expose `classifyShortText()` to allow clients to control where
   to split long texts (thus separating mechanism and policy).
 
