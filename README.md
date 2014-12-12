@@ -44,11 +44,11 @@ The `classify()` function follows the traditional TMF policy by which
 large texts are divided in chunks classified separately, and the result
 is generated merging the classification of each chunk of text.
 
-You can bypass this policy by using the `classifySmallText()` function
+You can bypass this policy by using the `classifyShortText()` function
 that directly passes the text to Lucene. Note, however, that depending on
 the Lucene configuration and on the text length, this call may raise an
 exception if the resulting Lucene query is too large.
 
     Classifier classifier = new Classifier(language);
-    List<String[]> res = classifier.classifySmallText(text,
+    List<String[]> res = classifier.classifyShortText(text,
                                   numTopics, language);
