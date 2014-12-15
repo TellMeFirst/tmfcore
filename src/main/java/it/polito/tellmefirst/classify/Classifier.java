@@ -59,12 +59,12 @@ public class Classifier {
 		LOG.debug("[constructor] - END");
 	}
 
-	public ArrayList<String[]> classify(String textString, int numOfTopics,
+	public ScoreDoc[] classify(String textString, int numOfTopics,
 			String lang) throws InterruptedException, IOException,
 			ParseException {
 		LOG.debug("[classify] - BEGIN");
 
-		ArrayList<String[]> result;
+		ScoreDoc[] hits;
 		Text text = new Text(textString);
 
 		int totalNumWords = TMFUtils.countWords(textString);
@@ -74,23 +74,22 @@ public class Classifier {
 			// no prod
 			LOG.debug("Text contains " + totalNumWords
 					+ " words. We'll use Classify for long texts.");
-			result = classifyLongText(text, numOfTopics, lang);
+			hits = classifyLongText(text, numOfTopics, lang);
 		} else {
 			// no prod
 			LOG.debug("Text contains " + totalNumWords
 					+ " words. We'll use Classify for short texts.");
-			result = classifyShortText(text, numOfTopics, lang);
+			hits = classifyShortText(text, numOfTopics, lang);
 		}
 		LOG.debug("[classify] - END");
 
-		return result;
+		return hits;
 	}
 
-	public ArrayList<String[]> classifyLongText(Text text, int numOfTopics,
+	public ScoreDoc[] classifyLongText(Text text, int numOfTopics,
 			String lang) throws InterruptedException,
 			IOException {
 		LOG.debug("[classifyLongText] - BEGIN");
-		ArrayList<String[]> result;
 		// no prod
 		LOG.debug("[classifyLongText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
@@ -162,9 +161,8 @@ public class Classifier {
 		for (int i = 0; i < finalHitsList.size(); i++) {
 			hits[i] = finalHitsList.get(i);
 		}
-		result = classifyCore(hits, numOfTopics, lang);
 		LOG.debug("[classifyLongText] - END");
-		return result;
+		return hits;
 	}
 
 	/**
@@ -184,24 +182,21 @@ public class Classifier {
 	 *
 	 * @since 2.0.0.0.
 	 */
-	public List<String[]> classifyShortText(String textString,
+	public ScoreDoc[] classifyShortText(String textString,
 			int numOfTopics, String lang) throws InterruptedException,
 			IOException, ParseException {
 		return classifyShortText(new Text(textString), numOfTopics, lang);
 	}
 
-	public ArrayList<String[]> classifyShortText(Text text, int numOfTopics,
+	public ScoreDoc[] classifyShortText(Text text, int numOfTopics,
 			String lang) throws ParseException, IOException {
 		LOG.debug("[classifyShortText] - BEGIN");
-		ArrayList<String[]> result;
-		// no prod
 		LOG.debug("[classifyShortText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		Query query = contextLuceneManager.getQueryForContext(text);
 		ScoreDoc[] hits = searcher.getHits(query);
-		result = classifyCore(hits, numOfTopics, lang);
 		LOG.debug("[classifyShortText] - END");
-		return result;
+		return hits;
 	}
 
 	public ArrayList<String[]> classifyCore(ScoreDoc[] hits, int numOfTopics, String lang) throws IOException {
