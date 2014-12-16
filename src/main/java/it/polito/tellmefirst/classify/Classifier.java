@@ -141,12 +141,13 @@ public class Classifier {
 		}
 		List<ScoreDoc> mergedHitList = new ArrayList<>();
 		List<ClassiThread> threadList = new ArrayList<>();
-		for (String textPiece : pieces) {
-			ClassiThread thread = new ClassiThread(contextLuceneManager,
-					searcher, textPiece);
+		pieces.stream().map((textPiece) -> new ClassiThread(
+				contextLuceneManager, searcher, textPiece)).map((thread) -> {
 			thread.start();
+			return thread;
+		}).forEach((thread) -> {
 			threadList.add(thread);
-		}
+		});
 		for (ClassiThread thread : threadList) {
 			thread.join();
 			ScoreDoc[] hits = thread.getHits();
@@ -157,10 +158,10 @@ public class Classifier {
 			mergedHitList.addAll(hitList);
 		}
 		Map<Integer, Integer> scoreDocCount = new HashMap<>();
-		for (ScoreDoc scoreDoc : mergedHitList) {
+		mergedHitList.stream().forEach((scoreDoc) -> {
 			Integer count = scoreDocCount.get(scoreDoc.doc);
 			scoreDocCount.put(scoreDoc.doc, (count == null) ? 1 : count + 1);
-		}
+		});
 		Map<Integer, Integer> sortedMap = TMFUtils
 				.sortIntegersMap(scoreDocCount);
 		Map<ScoreDoc, Integer> sortedMapWithScore = new LinkedHashMap<>();
@@ -284,9 +285,9 @@ public class Classifier {
 						List<String> typesArray = IndexesUtil.getTypes(
 								uri, "en");
 						StringBuilder typesString = new StringBuilder();
-						for (String type : typesArray) {
+						typesArray.stream().forEach((type) -> {
 							typesString.append(type).append("#");
-						}
+						});
 						mergedTypes = typesString.toString();
 					}
 
@@ -346,9 +347,9 @@ public class Classifier {
 			} while (i < apacheMap.size()
 					&& apacheMap.getValue(i) == apacheMap.getValue(i - 1));
 			i--;
-			for (Float score : treeMap.keySet()) {
+			treeMap.keySet().stream().forEach((score) -> {
 				result.add(treeMap.get(score));
-			}
+			});
 		}
 		LOG.debug("[sortByRank] - END");
 		return result;
