@@ -180,7 +180,7 @@ public class Classifier {
 		for (int i = 0; i < finalHitsList.size(); i++) {
 			hits[i] = finalHitsList.get(i);
 		}
-		result = classifyCore(hits, numOfTopics, lang);
+		result = postProcess(hits, numOfTopics, lang);
 		LOG.debug("[classifyLongText] - END");
 		return result;
 	}
@@ -218,12 +218,12 @@ public class Classifier {
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		Query query = contextLuceneManager.getQueryForContext(text);
 		ScoreDoc[] hits = searcher.getHits(query);
-		result = classifyCore(hits, numOfTopics, lang);
+		result = postProcess(hits, numOfTopics, lang);
 		LOG.debug("[classifyShortText] - END");
 		return result;
 	}
 
-	private List<String[]> classifyCore(ScoreDoc[] hits, int numOfTopics,
+	private List<String[]> postProcess(ScoreDoc[] hits, int numOfTopics,
 			String lang) throws IOException {
 		LOG.debug("[classifyCore] - BEGIN");
 
