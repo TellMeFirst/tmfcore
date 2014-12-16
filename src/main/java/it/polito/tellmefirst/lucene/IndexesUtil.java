@@ -31,6 +31,8 @@ import org.apache.lucene.util.Version;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+import org.apache.lucene.document.Document;
 
 public class IndexesUtil {
 
@@ -58,72 +60,59 @@ public class IndexesUtil {
 		LOG.debug("[initializator] - END");
 	}
 
-	public static ArrayList<String> getTypes(String uri, String lang) {
+	public static List<String> getTypes(String uri, String lang)
+			throws IOException {
 		LOG.debug("[getTypes] - BEGIN");
-		ArrayList<String> result = new ArrayList<String>();
-		try {
-			SimpleSearcher simpleSearcher = (lang.equals("it")) ? ITALIAN_CORPUS_INDEX_SEARCHER : ENGLISH_CORPUS_INDEX_SEARCHER;
-			String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "").replace("http://dbpedia.org/resource/", "");
-			Query q = new TermQuery(new Term("URI", cleanUri));
-			TopDocs hits = simpleSearcher.getIndexSearcher().search(q, 1);
-			if (hits.totalHits != 0) {
-				int docId = hits.scoreDocs[0].doc;
-				org.apache.lucene.document.Document doc = simpleSearcher.getFullDocument((docId));
-				Field[] types = doc.getFields("TYPE");
-				for (Field type : types) {
-					result.add(type.stringValue());
-				}
+		List<String> result = new ArrayList<>();
+		SimpleSearcher simpleSearcher = (lang.equals("it")) ? ITALIAN_CORPUS_INDEX_SEARCHER : ENGLISH_CORPUS_INDEX_SEARCHER;
+		String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "").replace("http://dbpedia.org/resource/", "");
+		Query q = new TermQuery(new Term("URI", cleanUri));
+		TopDocs hits = simpleSearcher.getIndexSearcher().search(q, 1);
+		if (hits.totalHits != 0) {
+			int docId = hits.scoreDocs[0].doc;
+			org.apache.lucene.document.Document doc = simpleSearcher.getFullDocument((docId));
+			Field[] types = doc.getFields("TYPE");
+			for (Field type : types) {
+				result.add(type.stringValue());
 			}
-		} catch (Exception e) {
-			LOG.error("[getTypes] - EXCEPTION: ", e);
 		}
 		LOG.debug("[getTypes] - END");
 		return result;
 	}
 
-	public static String getTitle(String uri, String lang) {
+	public static String getTitle(String uri, String lang) throws IOException {
 		LOG.debug("[getTitle] - BEGIN");
 		String result = "";
-		try {
-			SimpleSearcher simpleSearcher = (lang.equals("it")) ? ITALIAN_CORPUS_INDEX_SEARCHER : ENGLISH_CORPUS_INDEX_SEARCHER;
-			IndexSearcher indexSearcher = simpleSearcher.getIndexSearcher();
-			String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "").replace("http://dbpedia.org/resource/", "");
-			Query q = new TermQuery(new Term("URI", cleanUri));
-			TopDocs hits = indexSearcher.search(q, 1);
-			if (hits.totalHits != 0) {
-				int docId = hits.scoreDocs[0].doc;
-				org.apache.lucene.document.Document doc = simpleSearcher.getFullDocument(docId);
-				if (doc.getField("TITLE").stringValue() != null) {
-					result = doc.getField("TITLE").stringValue();
-				}
-			} else {
-				LOG.error("[getTitle] - ERROR: No Title found for the resource " + uri + " !!");
+		SimpleSearcher simpleSearcher = (lang.equals("it")) ? ITALIAN_CORPUS_INDEX_SEARCHER : ENGLISH_CORPUS_INDEX_SEARCHER;
+		IndexSearcher indexSearcher = simpleSearcher.getIndexSearcher();
+		String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "").replace("http://dbpedia.org/resource/", "");
+		Query q = new TermQuery(new Term("URI", cleanUri));
+		TopDocs hits = indexSearcher.search(q, 1);
+		if (hits.totalHits != 0) {
+			int docId = hits.scoreDocs[0].doc;
+			org.apache.lucene.document.Document doc = simpleSearcher.getFullDocument(docId);
+			if (doc.getField("TITLE").stringValue() != null) {
+				result = doc.getField("TITLE").stringValue();
 			}
-		} catch (Exception e) {
-			LOG.error("[getTitle] - EXCEPTION: ", e);
 		}
 		LOG.debug("[getTitle] - END");
 		return result;
 	}
 
-	public static String getImage(String uri, String lang) {
+	public static String getImage(String uri, String lang) throws IOException {
 		LOG.debug("[getImage] - BEGIN");
 		String result = "";
-		try {
-			SimpleSearcher simpleSearcher = (lang.equals("it")) ? ITALIAN_CORPUS_INDEX_SEARCHER : ENGLISH_CORPUS_INDEX_SEARCHER;
-			IndexSearcher indexSearcher = simpleSearcher.getIndexSearcher();
-			String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "").replace("http://dbpedia.org/resource/", "");
-			Query q = new TermQuery(new Term("URI", cleanUri));
-			TopDocs hits = indexSearcher.search(q, 1);
-			if (hits.totalHits != 0) {
-				int docId = hits.scoreDocs[0].doc;
-				org.apache.lucene.document.Document doc = simpleSearcher.getFullDocument(docId);
-				if (doc.getField("IMAGE") != null) {
-					result = doc.getField("IMAGE").stringValue();
-				}
+		SimpleSearcher simpleSearcher = (lang.equals("it")) ? ITALIAN_CORPUS_INDEX_SEARCHER : ENGLISH_CORPUS_INDEX_SEARCHER;
+		IndexSearcher indexSearcher = simpleSearcher.getIndexSearcher();
+		String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "").replace("http://dbpedia.org/resource/", "");
+		Query q = new TermQuery(new Term("URI", cleanUri));
+		TopDocs hits = indexSearcher.search(q, 1);
+		if (hits.totalHits != 0) {
+			int docId = hits.scoreDocs[0].doc;
+			Document doc = simpleSearcher.getFullDocument(docId);
+			if (doc.getField("IMAGE") != null) {
+				result = doc.getField("IMAGE").stringValue();
 			}
-		} catch (Exception e) {
-			LOG.error("[getImage] - EXCEPTION: ", e);
 		}
 		LOG.debug("[getImage] - END");
 		return result;
