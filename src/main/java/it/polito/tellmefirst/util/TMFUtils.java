@@ -121,6 +121,14 @@ public class TMFUtils {
 		return unchecked(ret, null);
 	}
 
+	public static void uncheckedVoid(Behaviour ret) {
+		try {
+			ret.behaviour();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static <T> T uncheck(Ret<T> ret, T defaultValue) {
 		return unchecked(ret, defaultValue);
 	}

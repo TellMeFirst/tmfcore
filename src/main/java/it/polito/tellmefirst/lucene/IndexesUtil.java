@@ -16,23 +16,15 @@
  */
 package it.polito.tellmefirst.lucene;
 
+import static it.polito.tellmefirst.util.TMFUtils.uncheckedVoid;
 import it.polito.tellmefirst.util.TMFVariables;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.it.ItalianAnalyzer;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.index.Term;
-import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.MMapDirectory;
 import org.apache.lucene.util.Version;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.lucene.document.Document;
 
 public class IndexesUtil {
 
@@ -40,24 +32,25 @@ public class IndexesUtil {
 	public static SimpleSearcher ITALIAN_CORPUS_INDEX_SEARCHER;
 	public static SimpleSearcher ENGLISH_CORPUS_INDEX_SEARCHER;
 
-	public static void init() throws IOException {
-		LOG.debug("[initializator] - BEGIN");
+	public static void init() {
+		uncheckedVoid(() -> {
+			LOG.debug("[initializator] - BEGIN");
 
-		// build italian searcher
-		Directory contextIndexDirIT = LuceneManager.pickDirectory(new File(TMFVariables.CORPUS_INDEX_IT));
-		LOG.info("Corpus index used for italian: " + contextIndexDirIT);
-		LuceneManager contextLuceneManagerIT = new LuceneManager(contextIndexDirIT);
-		contextLuceneManagerIT.setLuceneDefaultAnalyzer(new ItalianAnalyzer(Version.LUCENE_36, TMFVariables.STOPWORDS_IT));
-		ITALIAN_CORPUS_INDEX_SEARCHER = new SimpleSearcher(contextLuceneManagerIT);
+			// build italian searcher
+			Directory contextIndexDirIT = LuceneManager.pickDirectory(new File(TMFVariables.CORPUS_INDEX_IT));
+			LOG.info("Corpus index used for italian: " + contextIndexDirIT);
+			LuceneManager contextLuceneManagerIT = new LuceneManager(contextIndexDirIT);
+			contextLuceneManagerIT.setLuceneDefaultAnalyzer(new ItalianAnalyzer(Version.LUCENE_36, TMFVariables.STOPWORDS_IT));
+			ITALIAN_CORPUS_INDEX_SEARCHER = new SimpleSearcher(contextLuceneManagerIT);
 
-		// build english searcher
-		Directory contextIndexDirEN = LuceneManager.pickDirectory(new File(TMFVariables.CORPUS_INDEX_EN));
-		LOG.info("Corpus index used for english: " + contextIndexDirEN);
-		LuceneManager contextLuceneManagerEN = new LuceneManager(contextIndexDirEN);
-		contextLuceneManagerEN.setLuceneDefaultAnalyzer(new EnglishAnalyzer(Version.LUCENE_36, TMFVariables.STOPWORDS_EN));
-		ENGLISH_CORPUS_INDEX_SEARCHER = new SimpleSearcher(contextLuceneManagerEN);
+			// build english searcher
+			Directory contextIndexDirEN = LuceneManager.pickDirectory(new File(TMFVariables.CORPUS_INDEX_EN));
+			LOG.info("Corpus index used for english: " + contextIndexDirEN);
+			LuceneManager contextLuceneManagerEN = new LuceneManager(contextIndexDirEN);
+			contextLuceneManagerEN.setLuceneDefaultAnalyzer(new EnglishAnalyzer(Version.LUCENE_36, TMFVariables.STOPWORDS_EN));
+			ENGLISH_CORPUS_INDEX_SEARCHER = new SimpleSearcher(contextLuceneManagerEN);
 
-		LOG.debug("[initializator] - END");
+			LOG.debug("[initializator] - END");
+		});
 	}
-
 }
