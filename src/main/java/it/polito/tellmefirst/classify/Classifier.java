@@ -21,13 +21,13 @@ import it.polito.tellmefirst.lucene.IndexesUtil;
 import it.polito.tellmefirst.lucene.LuceneManager;
 import it.polito.tellmefirst.lucene.SimpleSearcher;
 import it.polito.tellmefirst.util.TMFUtils;
+import static it.polito.tellmefirst.util.TMFUtils.unchecked;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import java.util.TreeMap;
 import org.apache.commons.collections.map.LinkedMap;
@@ -82,28 +82,29 @@ public class Classifier {
 	 *
 	 * @since 1.0.0.0.
 	 */
-	public ArrayList<String[]> classify(String textString, int numOfTopics,
-			String lang) throws InterruptedException, IOException,
-			ParseException {
-		LOG.debug("[classify] - BEGIN");
+	public ArrayList<String[]> classify(String textString,
+			int numOfTopics, String lang) {
+		return unchecked(() -> {
+			LOG.debug("[classify] - BEGIN");
 
-		ArrayList<String[]> result;
-		Text text = new Text(textString);
+			ArrayList<String[]> result;
+			Text text = new Text(textString);
 
-		int totalNumWords = TMFUtils.countWords(textString);
-		LOG.debug("TOTAL WORDS: " + totalNumWords);
-		if (totalNumWords > 1000) {
-			LOG.debug("Text contains " + totalNumWords
-					+ " words. We'll use Classify for long texts.");
-			result = classifyLongText(text, numOfTopics, lang);
-		} else {
-			LOG.debug("Text contains " + totalNumWords
-					+ " words. We'll use Classify for short texts.");
-			result = classifyShortText(text, numOfTopics, lang);
-		}
-		LOG.debug("[classify] - END");
+			int totalNumWords = TMFUtils.countWords(textString);
+			LOG.debug("TOTAL WORDS: " + totalNumWords);
+			if (totalNumWords > 1000) {
+				LOG.debug("Text contains " + totalNumWords
+						+ " words. We'll use Classify for long texts.");
+				result = classifyLongText(text, numOfTopics, lang);
+			} else {
+				LOG.debug("Text contains " + totalNumWords
+						+ " words. We'll use Classify for short texts.");
+				result = classifyShortText(text, numOfTopics, lang);
+			}
+			LOG.debug("[classify] - END");
 
-		return result;
+			return result;
+		});
 	}
 
 	private ArrayList<String[]> classifyLongText(Text text, int numOfTopics,
@@ -125,7 +126,7 @@ public class Classifier {
 			String secondPart = StringUtils.join(longText.split(" "), " ",
 					1000, TMFUtils.countWords(longText));
 			pieces.add(firstPart);
-			LOG.debug("Piece n°" + n + " analyzing...");
+			LOG.debug("Piece num" + n + " analyzing...");
 			longText = secondPart;
 			if (TMFUtils.countWords(longText) < 300) {
 				LOG.debug("Final piece contains "
@@ -203,9 +204,11 @@ public class Classifier {
 	 * @since 2.0.0.0.
 	 */
 	public List<String[]> classifyShortText(String textString,
-			int numOfTopics, String lang) throws InterruptedException,
-			IOException, ParseException {
-		return classifyShortText(new Text(textString), numOfTopics, lang);
+			int numOfTopics, String lang) {
+		return unchecked(() -> {
+			return classifyShortText(new Text(textString),
+					numOfTopics, lang);
+		});
 	}
 
 	private ArrayList<String[]> classifyShortText(Text text, int numOfTopics,
