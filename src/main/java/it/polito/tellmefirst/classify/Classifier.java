@@ -54,16 +54,29 @@ public class Classifier {
 	 * @since 1.0.0.0.
 	 */
 	public Classifier(String lang) {
+		this(lang, null);
+	}
+
+	/**
+	 * Instantiate the classifier with custom searcher.
+	 * @param lang The classifier language ("it" or "en").
+	 * @param sea The custom searcher object.
+	 * @since 3.0.0.0.
+	 */
+	public Classifier(String lang, SimpleSearcher sea) {
 		LOG.debug("[constructor] - BEGIN");
 		if (lang.equals("it")) {
 			LOG.info("Initializing italian Classifier...");
-			searcher = IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
+			searcher = (sea != null) ? sea :
+					IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
 			language = "italian";
 		} else {
 			LOG.info("Initializing english Classifier...");
-			searcher = IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
+			searcher = (sea != null) ? sea :
+					IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
 			language = "english";
 		}
+		searcher = sea;
 		contextLuceneManager = searcher.getLuceneManager();
 		LOG.debug("[constructor] - END");
 	}
