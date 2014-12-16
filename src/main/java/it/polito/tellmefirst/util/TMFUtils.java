@@ -29,16 +29,16 @@ public class TMFUtils {
 	public static Set<String> getStopWords(String stopwordsFilePath)
 			throws IOException {
 		LOG.debug("[getStopWords] - BEGIN");
-		ArrayList<String> stopWordsList = new ArrayList<String>();
+		List<String> stopWordsList = new ArrayList<>();
 
-		BufferedReader bufferedReader = new BufferedReader(new FileReader(stopwordsFilePath));
-		String line = null;
-		while ((line = bufferedReader.readLine()) != null) {
-			stopWordsList.add(line.trim());
+		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(stopwordsFilePath))) {
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				stopWordsList.add(line.trim());
+			}
 		}
-		bufferedReader.close();
 
-		Set<String> stopwordsSet = new HashSet<String>(stopWordsList);
+		Set<String> stopwordsSet = new HashSet<>(stopWordsList);
 		LOG.debug("[getStopWords] - END");
 		return stopwordsSet;
 	}
