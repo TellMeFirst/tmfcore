@@ -16,13 +16,16 @@
  */
 package it.polito.tellmefirst.util;
 
-import static it.polito.tellmefirst.util.TMFUtils.uncheckedVoid;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.io.File;
+import static it.polito.tellmefirst.util.TMFUtils.unchecked;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class TMFVariables {
 
@@ -38,23 +41,39 @@ public class TMFVariables {
 	public static String RESIDUAL_KB_EN;
 	public static Set<String> STOPWORDS_EN;
 
-	public TMFVariables(String confFile) {
-		uncheckedVoid(() -> {
-			LOG.debug("[constructor] - BEGIN");
-			Properties config = new Properties();
-
-			config.load(new FileInputStream(new File(confFile)));
-			CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
-			KB_IT = config.getProperty("kb.it", "").trim();
-			RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
-			STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
-
-			CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
-			KB_EN = config.getProperty("kb.en", "").trim();
-			RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
-			STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
-
-			LOG.debug("[constructor] - END");
+	public TMFVariables() {
+		unchecked(() -> {
+			InputStream configStream = Thread.currentThread()
+				.getContextClassLoader()
+				.getResourceAsStream("tmfcore.properties");
+			init(configStream);
 		});
+	}
+
+	@Deprecated
+	public TMFVariables(String confFile) {
+		unchecked(() -> {
+			InputStream configStream = new FileInputStream(new File(confFile));
+			init(configStream);
+		});
+	}
+
+	private void init(InputStream confStream) throws IOException {
+		LOG.debug("[constructor] - BEGIN");
+		Properties config = new Properties();
+
+		config.load(confStream);
+
+		CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
+		KB_IT = config.getProperty("kb.it", "").trim();
+		RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
+		STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
+
+		CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
+		KB_EN = config.getProperty("kb.en", "").trim();
+		RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
+		STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
+
+		LOG.debug("[constructor] - END");
 	}
 }
