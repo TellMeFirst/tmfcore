@@ -44,14 +44,14 @@ public class TMFUtils {
 	}
 
 	// take a look at: http://www.lampos.net/sort-hashmap
-	public static LinkedHashMap sortHashMapIntegers(HashMap passedMap) {
+	public static Map sortIntegersMap(Map passedMap) {
 		LOG.debug("[sortHashMapIntegers] - BEGIN");
 		List mapKeys = new ArrayList(passedMap.keySet());
 		List mapValues = new ArrayList(passedMap.values());
 		Collections.sort(mapValues);
 		Collections.reverse(mapValues);
 		Collections.sort(mapKeys);
-		LinkedHashMap sortedMap = new LinkedHashMap();
+		Map sortedMap = new LinkedHashMap();
 		Iterator valueIt = mapValues.iterator();
 		while (valueIt.hasNext()) {
 			Object val = valueIt.next();

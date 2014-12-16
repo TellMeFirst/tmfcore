@@ -156,13 +156,13 @@ public class Classifier {
 			}
 			mergedHitList.addAll(hitList);
 		}
-		HashMap<Integer, Integer> scoreDocCount = new HashMap<>();
+		Map<Integer, Integer> scoreDocCount = new HashMap<>();
 		for (ScoreDoc scoreDoc : mergedHitList) {
 			Integer count = scoreDocCount.get(scoreDoc.doc);
 			scoreDocCount.put(scoreDoc.doc, (count == null) ? 1 : count + 1);
 		}
 		Map<Integer, Integer> sortedMap = TMFUtils
-				.sortHashMapIntegers(scoreDocCount);
+				.sortIntegersMap(scoreDocCount);
 		Map<ScoreDoc, Integer> sortedMapWithScore = new LinkedHashMap<>();
 		for (int docnum : sortedMap.keySet()) {
 			Document doc = searcher.getFullDocument(docnum); // XXX
