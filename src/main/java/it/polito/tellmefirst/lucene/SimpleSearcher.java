@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto
+ * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -33,9 +33,10 @@ public class SimpleSearcher {
 	public SimpleSearcher(LuceneManager lucene) throws IOException {
 		LOG.debug("[constructor] - BEGIN");
 		luceneManager = lucene;
-		//no prod
-		LOG.debug("Opening IndexSearcher for Lucene directory " + luceneManager.getLuceneCorpusIndexDirectory());
-		indexReader = IndexReader.open(luceneManager.getLuceneCorpusIndexDirectory(), true);
+		LOG.debug("Opening IndexSearcher for Lucene directory "
+				+ luceneManager.getLuceneCorpusIndexDirectory());
+		indexReader = IndexReader.open(luceneManager
+				.getLuceneCorpusIndexDirectory(), true);
 		indexSearcher = new IndexSearcher(indexReader);
 		LOG.debug("[constructor] - END");
 	}
@@ -50,15 +51,18 @@ public class SimpleSearcher {
 
 	public ScoreDoc[] getHits(Query query) throws IOException {
 		LOG.debug("[getHits] - BEGIN");
-		ScoreDoc[] result = getTopResults(query, luceneManager.getLimitForQueryResult());
+		ScoreDoc[] result = getTopResults(query,
+				luceneManager.getLimitForQueryResult());
 		LOG.debug("[getHits] - END");
 		return result;
 	}
 
-	private ScoreDoc[] getTopResults(Query query, int numResults) throws IOException {
+	private ScoreDoc[] getTopResults(Query query, int numResults)
+			throws IOException {
 		ScoreDoc[] hits;
 		LOG.debug("[getTopResults] - BEGIN");
-		TopScoreDocCollector collector = TopScoreDocCollector.create(numResults, false);
+		TopScoreDocCollector collector = TopScoreDocCollector.create(
+				numResults, false);
 		indexSearcher.search(query, collector);
 		hits = collector.topDocs().scoreDocs;
 		LOG.debug("[getTopResults] - END");
