@@ -16,9 +16,9 @@
  */
 package it.polito.tellmefirst.util;
 
+import static it.polito.tellmefirst.util.TMFUtils.unchecked;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import static it.polito.tellmefirst.util.TMFUtils.unchecked;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
