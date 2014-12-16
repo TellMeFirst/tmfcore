@@ -76,7 +76,6 @@ public class Classifier {
 					IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
 			language = "english";
 		}
-		searcher = sea;
 		contextLuceneManager = searcher.getLuceneManager();
 		LOG.debug("[constructor] - END");
 	}
