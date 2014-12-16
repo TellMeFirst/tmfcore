@@ -229,104 +229,97 @@ public class Classifier {
 
 		List<String[]> result = new ArrayList<>();
 
-		if (hits.length == 0) {
-			LOG.error("No results given by Lucene query from Classify!!");
-		} else {
+		for (int i = 0; i < numOfTopics && i < hits.length; i++) {
 
-			for (int i = 0; i < numOfTopics; i++) {
+			String[] arrayOfFields = new String[7];
 
-				String[] arrayOfFields = new String[7];
+			Document doc = searcher.getFullDocument(hits[i].doc);
+			String uri;
+			String visLabel;
+			String title;
+			String mergedTypes;
+			String image;
+			String wikilink;
 
-				Document doc = searcher.getFullDocument(hits[i].doc);
-				String uri;
-				String visLabel;
-				String title;
-				String mergedTypes;
-				String image;
-				String wikilink;
+			if (lang.equals("italian")) {
+				String italianUri = "http://it.dbpedia.org/resource/"
+						+ doc.getField("URI").stringValue();
+				wikilink = "http://it.wikipedia.org/wiki/"
+						+ doc.getField("URI").stringValue();
 
-				if (lang.equals("italian")) {
-					String italianUri = "http://it.dbpedia.org/resource/"
-							+ doc.getField("URI").stringValue();
-					wikilink = "http://it.wikipedia.org/wiki/"
-							+ doc.getField("URI").stringValue();
-
-					// Italian: resource without a corresponding
-					// in-English DBpedia
-					if (doc.getField("SAMEAS") == null) {
-						uri = italianUri;
-						title = doc.getField("TITLE").stringValue();
-						visLabel = title.replaceAll("\\(.+?\\)", "").trim();
-						Field[] types = doc.getFields("TYPE");
-						StringBuilder typesString = new StringBuilder();
-						for (Field value : types) {
-							typesString.append(value.stringValue()).append("#");
-						}
-						mergedTypes = typesString.toString();
-						image = ofNullable(doc.getField("IMAGE"))
-								.flatMap(y -> ofNullable(y.stringValue()))
-								.orElse("");
-
-						//
-						// Italian: resource with a corresponding in-English
-						// DBpedia.
-						//
-						// Note: in this case we use getImage() to get the
-						// image URL, rather than the "IMAGE" field, under the
-						// assumption that the english version of DBPedia is
-						// more rich.
-						//
-					} else {
-						uri = doc.getField("SAMEAS").stringValue();
-						title = IndexesUtil.getTitle(uri, "en");
-						visLabel = doc.getField("TITLE").stringValue()
-								.replaceAll("\\(.+?\\)", "").trim();
-						image = IndexesUtil.getImage(uri, "en");
-						List<String> typesArray = IndexesUtil.getTypes(
-								uri, "en");
-						StringBuilder typesString = new StringBuilder();
-						typesArray.stream().forEach((type) -> {
-							typesString.append(type).append("#");
-						});
-						mergedTypes = typesString.toString();
-					}
-
-					// English
-				} else {
-					uri = "http://dbpedia.org/resource/"
-							+ doc.getField("URI").stringValue();
-					wikilink = "http://en.wikipedia.org/wiki/"
-							+ doc.getField("URI").stringValue();
+				// Italian: resource without a corresponding
+				// in-English DBpedia
+				if (doc.getField("SAMEAS") == null) {
+					uri = italianUri;
 					title = doc.getField("TITLE").stringValue();
 					visLabel = title.replaceAll("\\(.+?\\)", "").trim();
-					image = ofNullable(doc.getField("IMAGE"))
-							.flatMap(y -> ofNullable(y.stringValue()))
-							.orElse("");
 					Field[] types = doc.getFields("TYPE");
 					StringBuilder typesString = new StringBuilder();
 					for (Field value : types) {
 						typesString.append(value.stringValue()).append("#");
 					}
 					mergedTypes = typesString.toString();
+					image = ofNullable(doc.getField("IMAGE"))
+							.flatMap(y -> ofNullable(y.stringValue()))
+							.orElse("");
+
+				//
+				// Italian: resource with a corresponding in-English
+				// DBpedia.
+				//
+				// Note: in this case we use getImage() to get the
+				// image URL, rather than the "IMAGE" field, under the
+				// assumption that the english version of DBPedia is
+				// more rich.
+				//
+				} else {
+					uri = doc.getField("SAMEAS").stringValue();
+					title = IndexesUtil.getTitle(uri, "en");
+					visLabel = doc.getField("TITLE").stringValue()
+							.replaceAll("\\(.+?\\)", "").trim();
+					image = IndexesUtil.getImage(uri, "en");
+					List<String> typesArray = IndexesUtil.getTypes(
+							uri, "en");
+					StringBuilder typesString = new StringBuilder();
+					typesArray.stream().forEach((type) -> {
+						typesString.append(type).append("#");
+					});
+					mergedTypes = typesString.toString();
 				}
 
-				LOG.debug("[classifyCore] - uri = " + uri);
-				LOG.debug("[classifyCore] - title = " + title);
-				LOG.debug("[classifyCore] - wikilink = " + wikilink);
-				// LOG.debug("[classifyCore] - getWikiHtmlUrl = " +
-				// getWikiHtmlUrl);
-
-				String score = String.valueOf(hits[i].score);
-				arrayOfFields[0] = uri;
-				arrayOfFields[1] = visLabel;
-				arrayOfFields[2] = title;
-				arrayOfFields[3] = score;
-				arrayOfFields[4] = mergedTypes;
-				arrayOfFields[5] = image;
-				arrayOfFields[6] = wikilink;
-
-				result.add(arrayOfFields);
+			// English
+			} else {
+				uri = "http://dbpedia.org/resource/"
+						+ doc.getField("URI").stringValue();
+				wikilink = "http://en.wikipedia.org/wiki/"
+						+ doc.getField("URI").stringValue();
+				title = doc.getField("TITLE").stringValue();
+				visLabel = title.replaceAll("\\(.+?\\)", "").trim();
+				image = ofNullable(doc.getField("IMAGE"))
+						.flatMap(y -> ofNullable(y.stringValue()))
+						.orElse("");
+				Field[] types = doc.getFields("TYPE");
+				StringBuilder typesString = new StringBuilder();
+				for (Field value : types) {
+					typesString.append(value.stringValue()).append("#");
+				}
+				mergedTypes = typesString.toString();
 			}
+
+			LOG.debug("[classifyCore] - uri = " + uri);
+			LOG.debug("[classifyCore] - title = " + title);
+			LOG.debug("[classifyCore] - wikilink = " + wikilink);
+
+			String score = String.valueOf(hits[i].score);
+			arrayOfFields[0] = uri;
+			arrayOfFields[1] = visLabel;
+			arrayOfFields[2] = title;
+			arrayOfFields[3] = score;
+			arrayOfFields[4] = mergedTypes;
+			arrayOfFields[5] = image;
+			arrayOfFields[6] = wikilink;
+
+			result.add(arrayOfFields);
 		}
 
 		LOG.debug("[classifyCore] - END size=" + result.size());
