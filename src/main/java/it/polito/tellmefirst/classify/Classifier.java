@@ -68,15 +68,12 @@ public class Classifier {
 		Text text = new Text(textString);
 
 		int totalNumWords = TMFUtils.countWords(textString);
-		// no prod
 		LOG.debug("TOTAL WORDS: " + totalNumWords);
 		if (totalNumWords > 1000) {
-			// no prod
 			LOG.debug("Text contains " + totalNumWords
 					+ " words. We'll use Classify for long texts.");
 			result = classifyLongText(text, numOfTopics, lang);
 		} else {
-			// no prod
 			LOG.debug("Text contains " + totalNumWords
 					+ " words. We'll use Classify for short texts.");
 			result = classifyShortText(text, numOfTopics, lang);
@@ -91,7 +88,6 @@ public class Classifier {
 			IOException {
 		LOG.debug("[classifyLongText] - BEGIN");
 		ArrayList<String[]> result;
-		// no prod
 		LOG.debug("[classifyLongText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		String longText = text.getText();
@@ -106,16 +102,13 @@ public class Classifier {
 			String secondPart = StringUtils.join(longText.split(" "), " ",
 					1000, TMFUtils.countWords(longText));
 			pieces.add(firstPart);
-			// no prod
 			LOG.debug("Piece n°" + n + " analyzing...");
 			longText = secondPart;
 			if (TMFUtils.countWords(longText) < 300) {
-				// no prod
 				LOG.debug("Final piece contains "
 						+ TMFUtils.countWords(longText)
 						+ " words. Discarded, because < " + "300 words.");
 			} else if (TMFUtils.countWords(longText) < 1000) {
-				// no prod
 				LOG.debug("Final piece contains "
 						+ TMFUtils.countWords(longText) + " words.");
 				pieces.add(longText);
@@ -194,7 +187,6 @@ public class Classifier {
 			String lang) throws ParseException, IOException {
 		LOG.debug("[classifyShortText] - BEGIN");
 		ArrayList<String[]> result;
-		// no prod
 		LOG.debug("[classifyShortText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		Query query = contextLuceneManager.getQueryForContext(text);
