@@ -286,12 +286,11 @@ public class Classifier {
 				//
 				} else {
 					uri = doc.getField("SAMEAS").stringValue();
-					title = IndexesUtil.getTitle(uri, "en");
+					title = searcher.getTitle(uri);
 					visLabel = doc.getField("TITLE").stringValue()
 							.replaceAll("\\(.+?\\)", "").trim();
-					image = IndexesUtil.getImage(uri, "en");
-					List<String> typesArray = IndexesUtil.getTypes(
-							uri, "en");
+					image = searcher.getImage(uri);
+					List<String> typesArray = searcher.getTypes(uri);
 					StringBuilder typesString = new StringBuilder();
 					typesArray.stream().forEach((type) -> {
 						typesString.append(type).append("#");

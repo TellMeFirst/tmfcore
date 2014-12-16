@@ -21,14 +21,21 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.TopScoreDocCollector;
 
 public class SimpleSearcher {
 
 	static Log LOG = LogFactory.getLog(SimpleSearcher.class);
+
 	LuceneManager luceneManager;
 	IndexSearcher indexSearcher;
 	IndexReader indexReader;
@@ -78,5 +85,60 @@ public class SimpleSearcher {
 
 	public IndexSearcher getIndexSearcher() {
 		return indexSearcher;
+	}
+
+	public String getTitle(String uri) throws IOException {
+		LOG.debug("[getTitle] - BEGIN");
+		String result = "";
+		String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "")
+				.replace("http://dbpedia.org/resource/", "");
+		Query q = new TermQuery(new Term("URI", cleanUri));
+		TopDocs hits = indexSearcher.search(q, 1);
+		if (hits.totalHits != 0) {
+			int docId = hits.scoreDocs[0].doc;
+			Document doc = getFullDocument(docId);
+			if (doc.getField("TITLE").stringValue() != null) {
+				result = doc.getField("TITLE").stringValue();
+			}
+		}
+		LOG.debug("[getTitle] - END");
+		return result;
+	}
+
+	public String getImage(String uri) throws IOException {
+		LOG.debug("[getImage] - BEGIN");
+		String result = "";
+		String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "")
+				.replace("http://dbpedia.org/resource/", "");
+		Query q = new TermQuery(new Term("URI", cleanUri));
+		TopDocs hits = indexSearcher.search(q, 1);
+		if (hits.totalHits != 0) {
+			int docId = hits.scoreDocs[0].doc;
+			Document doc = getFullDocument(docId);
+			if (doc.getField("IMAGE") != null) {
+				result = doc.getField("IMAGE").stringValue();
+			}
+		}
+		LOG.debug("[getImage] - END");
+		return result;
+	}
+
+	public List getTypes(String uri) throws IOException {
+		LOG.debug("[getTypes] - BEGIN");
+		List<String> result = new ArrayList<>();
+		String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "")
+				.replace("http://dbpedia.org/resource/", "");
+		Query q = new TermQuery(new Term("URI", cleanUri));
+		TopDocs hits = getIndexSearcher().search(q, 1);
+		if (hits.totalHits != 0) {
+			int docId = hits.scoreDocs[0].doc;
+			Document doc = getFullDocument(docId);
+			Field[] types = doc.getFields("TYPE");
+			for (Field type : types) {
+				result.add(type.stringValue());
+			}
+		}
+		LOG.debug("[getTypes] - END");
+		return result;
 	}
 }
