@@ -57,22 +57,24 @@ public class TMFVariables {
 		});
 	}
 
-	private void init(InputStream confStream) throws IOException {
-		LOG.debug("[constructor] - BEGIN");
-		Properties config = new Properties();
+	private void init(InputStream confStream) {
+		unchecked(() -> {
+			LOG.debug("[constructor] - BEGIN");
+			Properties config = new Properties();
 
-		config.load(confStream);
+			config.load(confStream);
 
-		CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
-		KB_IT = config.getProperty("kb.it", "").trim();
-		RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
-		STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
+			CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
+			KB_IT = config.getProperty("kb.it", "").trim();
+			RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
+			STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
 
-		CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
-		KB_EN = config.getProperty("kb.en", "").trim();
-		RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
-		STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
+			CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
+			KB_EN = config.getProperty("kb.en", "").trim();
+			RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
+			STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
 
-		LOG.debug("[constructor] - END");
+			LOG.debug("[constructor] - END");
+		});
 	}
 }
