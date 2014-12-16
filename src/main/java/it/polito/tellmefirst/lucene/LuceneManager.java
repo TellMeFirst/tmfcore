@@ -37,10 +37,10 @@ public class LuceneManager {
 	static Log LOG = LogFactory.getLog(LuceneManager.class);
 	private Analyzer luceneDefaultAnalyzer = new StandardAnalyzer(
 			Version.LUCENE_36);
-	private Directory luceneCorpusIndexDirectory;
+	private final Directory luceneCorpusIndexDirectory;
 
 	// This attribute is taylored for TMF GUI:
-	private int limitForQueryResult = 7;
+	private final int limitForQueryResult = 7;
 
 	public LuceneManager(Directory directory) throws IOException {
 		LOG.debug("[constructor] - BEGIN");
