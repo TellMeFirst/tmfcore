@@ -113,6 +113,14 @@ public class TMFUtils {
 		return returnValue;
 	}
 
+	public static void unchecked(Behaviour ret) {
+		try {
+			ret.behaviour();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public static <T> T optional(Ret<T> ret) {
 		return optional(ret, null);
 	}

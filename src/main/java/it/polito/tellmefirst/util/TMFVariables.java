@@ -16,13 +16,15 @@
  */
 package it.polito.tellmefirst.util;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import static it.polito.tellmefirst.util.TMFUtils.unchecked;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class TMFVariables {
 
@@ -38,11 +40,27 @@ public class TMFVariables {
 	public static String RESIDUAL_KB_EN;
 	public static Set<String> STOPWORDS_EN;
 
-	public TMFVariables(String confFile) throws IOException {
+	public TMFVariables() {
+		unchecked(() -> {
+			InputStream configStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("tmfcore.properties");
+			init(configStream);
+		});
+	}
+
+	@Deprecated
+	public TMFVariables(String confFile) {
+		unchecked(() -> {
+			InputStream configStream = new FileInputStream(new File(confFile));
+			init(configStream);
+		});
+	}
+
+	private void init(InputStream confStream) throws IOException {
 		LOG.debug("[constructor] - BEGIN");
 		Properties config = new Properties();
 
-		config.load(new FileInputStream(new File(confFile)));
+		config.load(confStream);
+
 		CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
 		KB_IT = config.getProperty("kb.it", "").trim();
 		RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
