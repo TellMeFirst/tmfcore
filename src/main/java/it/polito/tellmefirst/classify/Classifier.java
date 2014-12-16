@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import static java.util.Optional.ofNullable;
 import java.util.TreeMap;
 import org.apache.commons.collections.map.LinkedMap;
@@ -82,12 +83,12 @@ public class Classifier {
 	 *
 	 * @since 1.0.0.0.
 	 */
-	public ArrayList<String[]> classify(String textString,
+	public List<String[]> classify(String textString,
 			int numOfTopics, String lang) {
 		return unchecked(() -> {
 			LOG.debug("[classify] - BEGIN");
 
-			ArrayList<String[]> result;
+			List<String[]> result;
 			Text text = new Text(textString);
 
 			int totalNumWords = TMFUtils.countWords(textString);
@@ -107,15 +108,14 @@ public class Classifier {
 		});
 	}
 
-	private ArrayList<String[]> classifyLongText(Text text, int numOfTopics,
-			String lang) throws InterruptedException,
-			IOException {
+	private List<String[]> classifyLongText(Text text, int numOfTopics,
+			String lang) throws InterruptedException, IOException {
 		LOG.debug("[classifyLongText] - BEGIN");
-		ArrayList<String[]> result;
+		List<String[]> result;
 		LOG.debug("[classifyLongText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		String longText = text.getText();
-		ArrayList<String> pieces = new ArrayList<>();
+		List<String> pieces = new ArrayList<>();
 
 		// split long text in smaller parts and call
 		// getContextQueryForKBasedDisambiguator() for each one
@@ -139,8 +139,8 @@ public class Classifier {
 			}
 			n++;
 		}
-		ArrayList<ScoreDoc> mergedHitList = new ArrayList<>();
-		ArrayList<ClassiThread> threadList = new ArrayList<>();
+		List<ScoreDoc> mergedHitList = new ArrayList<>();
+		List<ClassiThread> threadList = new ArrayList<>();
 		for (String textPiece : pieces) {
 			ClassiThread thread = new ClassiThread(contextLuceneManager,
 					searcher, textPiece);
@@ -150,7 +150,7 @@ public class Classifier {
 		for (ClassiThread thread : threadList) {
 			thread.join();
 			ScoreDoc[] hits = thread.getHits();
-			ArrayList<ScoreDoc> hitList = new ArrayList<>();
+			List<ScoreDoc> hitList = new ArrayList<>();
 			for (int b = 0; b < numOfTopics && b < hits.length; b++) {
 				hitList.add(hits[b]);
 			}
@@ -161,10 +161,9 @@ public class Classifier {
 			Integer count = scoreDocCount.get(scoreDoc.doc);
 			scoreDocCount.put(scoreDoc.doc, (count == null) ? 1 : count + 1);
 		}
-		HashMap<Integer, Integer> sortedMap = TMFUtils
+		Map<Integer, Integer> sortedMap = TMFUtils
 				.sortHashMapIntegers(scoreDocCount);
-		LinkedHashMap<ScoreDoc, Integer> sortedMapWithScore = new
-				LinkedHashMap<>();
+		Map<ScoreDoc, Integer> sortedMapWithScore = new LinkedHashMap<>();
 		for (int docnum : sortedMap.keySet()) {
 			Document doc = searcher.getFullDocument(docnum); // XXX
 			boolean flag = true;
@@ -175,7 +174,7 @@ public class Classifier {
 				}
 			}
 		}
-		ArrayList<ScoreDoc> finalHitsList = sortByRank(sortedMapWithScore);
+		List<ScoreDoc> finalHitsList = sortByRank(sortedMapWithScore);
 		ScoreDoc[] hits = new ScoreDoc[finalHitsList.size()];
 		for (int i = 0; i < finalHitsList.size(); i++) {
 			hits[i] = finalHitsList.get(i);
@@ -210,10 +209,10 @@ public class Classifier {
 		});
 	}
 
-	private ArrayList<String[]> classifyShortText(Text text, int numOfTopics,
+	private List<String[]> classifyShortText(Text text, int numOfTopics,
 			String lang) throws ParseException, IOException {
 		LOG.debug("[classifyShortText] - BEGIN");
-		ArrayList<String[]> result;
+		List<String[]> result;
 		LOG.debug("[classifyShortText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		Query query = contextLuceneManager.getQueryForContext(text);
@@ -223,11 +222,11 @@ public class Classifier {
 		return result;
 	}
 
-	private ArrayList<String[]> classifyCore(ScoreDoc[] hits, int numOfTopics,
+	private List<String[]> classifyCore(ScoreDoc[] hits, int numOfTopics,
 			String lang) throws IOException {
 		LOG.debug("[classifyCore] - BEGIN");
 
-		ArrayList<String[]> result = new ArrayList<>();
+		List<String[]> result = new ArrayList<>();
 
 		if (hits.length == 0) {
 			LOG.error("No results given by Lucene query from Classify!!");
@@ -282,7 +281,7 @@ public class Classifier {
 						visLabel = doc.getField("TITLE").stringValue()
 								.replaceAll("\\(.+?\\)", "").trim();
 						image = IndexesUtil.getImage(uri, "en");
-						ArrayList<String> typesArray = IndexesUtil.getTypes(
+						List<String> typesArray = IndexesUtil.getTypes(
 								uri, "en");
 						StringBuilder typesString = new StringBuilder();
 						for (String type : typesArray) {
@@ -333,13 +332,12 @@ public class Classifier {
 		return result;
 	}
 
-	private ArrayList<ScoreDoc> sortByRank(
-			LinkedHashMap<ScoreDoc, Integer> inputList) {
+	private List<ScoreDoc> sortByRank(Map<ScoreDoc, Integer> inputList) {
 		LOG.debug("[sortByRank] - BEGIN");
-		ArrayList<ScoreDoc> result = new ArrayList<>();
+		List<ScoreDoc> result = new ArrayList<>();
 		LinkedMap apacheMap = new LinkedMap(inputList);
 		for (int i = 0; i < apacheMap.size() - 1; i++) {
-			TreeMap<Float, ScoreDoc> treeMap = new TreeMap<>(
+			Map<Float, ScoreDoc> treeMap = new TreeMap<>(
 					Collections.reverseOrder());
 			do {
 				i++;
