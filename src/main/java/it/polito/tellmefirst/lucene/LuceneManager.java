@@ -23,7 +23,6 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryParser.ParseException;
 import org.apache.lucene.queryParser.QueryParser;
-import org.apache.lucene.search.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.MMapDirectory;
@@ -31,6 +30,7 @@ import org.apache.lucene.store.NIOFSDirectory;
 import org.apache.lucene.util.Version;
 import java.io.File;
 import java.io.IOException;
+import org.apache.lucene.search.Query;
 
 public class LuceneManager {
 
