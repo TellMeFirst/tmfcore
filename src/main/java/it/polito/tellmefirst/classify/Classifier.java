@@ -259,7 +259,7 @@ public class Classifier {
 						Field[] types = doc.getFields("TYPE");
 						StringBuilder typesString = new StringBuilder();
 						for (Field value : types) {
-							typesString.append(value.stringValue() + "#");
+							typesString.append(value.stringValue()).append("#");
 						}
 						mergedTypes = typesString.toString();
 						image = ofNullable(doc.getField("IMAGE"))
@@ -285,7 +285,7 @@ public class Classifier {
 								uri, "en");
 						StringBuilder typesString = new StringBuilder();
 						for (String type : typesArray) {
-							typesString.append(type + "#");
+							typesString.append(type).append("#");
 						}
 						mergedTypes = typesString.toString();
 					}
@@ -304,7 +304,7 @@ public class Classifier {
 					Field[] types = doc.getFields("TYPE");
 					StringBuilder typesString = new StringBuilder();
 					for (Field value : types) {
-						typesString.append(value.stringValue() + "#");
+						typesString.append(value.stringValue()).append("#");
 					}
 					mergedTypes = typesString.toString();
 				}
