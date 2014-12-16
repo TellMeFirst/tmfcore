@@ -45,6 +45,7 @@ public class Classifier {
 
 	LuceneManager contextLuceneManager;
 	SimpleSearcher searcher;
+	String language;
 	static Log LOG = LogFactory.getLog(Classifier.class);
 
 	/**
@@ -57,9 +58,11 @@ public class Classifier {
 		if (lang.equals("it")) {
 			LOG.info("Initializing italian Classifier...");
 			searcher = IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
+			language = "italian";
 		} else {
 			LOG.info("Initializing english Classifier...");
 			searcher = IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
+			language = "english";
 		}
 		contextLuceneManager = searcher.getLuceneManager();
 		LOG.debug("[constructor] - END");
@@ -75,8 +78,6 @@ public class Classifier {
 	 * @param textString the input piece of text.
 	 * @param numOfTopics maximum number of topics to be returned (less
 	 *        topics may be returned).
-	 * @param lang the classifier language (yes, this argument is
-	 *        redundant and will be removed in the future).
 	 * @return A list of vectors of strings. Each vector shall be composed
 	 *         of seven strings: the URI, the label, the title, the
 	 *         score, the merged type, the image, and the wiki link.
@@ -84,7 +85,7 @@ public class Classifier {
 	 * @since 1.0.0.0.
 	 */
 	public List<String[]> classify(String textString,
-			int numOfTopics, String lang) {
+			int numOfTopics) {
 		return unchecked(() -> {
 			LOG.debug("[classify] - BEGIN");
 
@@ -96,11 +97,11 @@ public class Classifier {
 			if (totalNumWords > 1000) {
 				LOG.debug("Text contains " + totalNumWords
 						+ " words. We'll use Classify for long texts.");
-				result = classifyLongText(text, numOfTopics, lang);
+				result = classifyLongText(text, numOfTopics);
 			} else {
 				LOG.debug("Text contains " + totalNumWords
 						+ " words. We'll use Classify for short texts.");
-				result = classifyShortText(text, numOfTopics, lang);
+				result = classifyShortText(text, numOfTopics);
 			}
 			LOG.debug("[classify] - END");
 
@@ -108,8 +109,8 @@ public class Classifier {
 		});
 	}
 
-	private List<String[]> classifyLongText(Text text, int numOfTopics,
-			String lang) throws InterruptedException, IOException {
+	private List<String[]> classifyLongText(Text text, int numOfTopics)
+			throws InterruptedException, IOException {
 		LOG.debug("[classifyLongText] - BEGIN");
 		List<String[]> result;
 		LOG.debug("[classifyLongText] - We're using as analyzer: "
@@ -180,7 +181,7 @@ public class Classifier {
 		for (int i = 0; i < finalHitsList.size(); i++) {
 			hits[i] = finalHitsList.get(i);
 		}
-		result = postProcess(hits, numOfTopics, lang);
+		result = postProcess(hits, numOfTopics);
 		LOG.debug("[classifyLongText] - END");
 		return result;
 	}
@@ -194,8 +195,6 @@ public class Classifier {
 	 * @param textString the input piece of text.
 	 * @param numOfTopics maximum number of topics to be returned (less
 	 *        topics may be returned).
-	 * @param lang the classifier language (yes, this argument is
-	 *        redundant and will be removed in the future).
 	 * @return A list of vectors of strings. Each vector shall be composed
 	 *         of seven strings: the URI, the label, the title, the
 	 *         score, the merged type, the image, and the wiki link.
@@ -203,28 +202,28 @@ public class Classifier {
 	 * @since 2.0.0.0.
 	 */
 	public List<String[]> classifyShortText(String textString,
-			int numOfTopics, String lang) {
+			int numOfTopics) {
 		return unchecked(() -> {
 			return classifyShortText(new Text(textString),
-					numOfTopics, lang);
+					numOfTopics);
 		});
 	}
 
-	private List<String[]> classifyShortText(Text text, int numOfTopics,
-			String lang) throws ParseException, IOException {
+	private List<String[]> classifyShortText(Text text, int numOfTopics)
+			throws ParseException, IOException {
 		LOG.debug("[classifyShortText] - BEGIN");
 		List<String[]> result;
 		LOG.debug("[classifyShortText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		Query query = contextLuceneManager.getQueryForContext(text);
 		ScoreDoc[] hits = searcher.getHits(query);
-		result = postProcess(hits, numOfTopics, lang);
+		result = postProcess(hits, numOfTopics);
 		LOG.debug("[classifyShortText] - END");
 		return result;
 	}
 
-	private List<String[]> postProcess(ScoreDoc[] hits, int numOfTopics,
-			String lang) throws IOException {
+	private List<String[]> postProcess(ScoreDoc[] hits, int numOfTopics)
+			throws IOException {
 		LOG.debug("[classifyCore] - BEGIN");
 
 		List<String[]> result = new ArrayList<>();
@@ -241,7 +240,7 @@ public class Classifier {
 			String image;
 			String wikilink;
 
-			if (lang.equals("italian")) {
+			if (language.equals("italian")) {
 				String italianUri = "http://it.dbpedia.org/resource/"
 						+ doc.getField("URI").stringValue();
 				wikilink = "http://it.wikipedia.org/wiki/"
@@ -287,7 +286,6 @@ public class Classifier {
 					mergedTypes = typesString.toString();
 				}
 
-			// English
 			} else {
 				uri = "http://dbpedia.org/resource/"
 						+ doc.getField("URI").stringValue();
