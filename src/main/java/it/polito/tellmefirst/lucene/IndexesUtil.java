@@ -16,7 +16,7 @@
  */
 package it.polito.tellmefirst.lucene;
 
-import static it.polito.tellmefirst.util.TMFUtils.uncheckedVoid;
+import static it.polito.tellmefirst.util.TMFUtils.unchecked;
 import it.polito.tellmefirst.util.TMFVariables;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,7 +33,7 @@ public class IndexesUtil {
 	public static SimpleSearcher ENGLISH_CORPUS_INDEX_SEARCHER;
 
 	public static void init() {
-		uncheckedVoid(() -> {
+		unchecked(() -> {
 			LOG.debug("[initializator] - BEGIN");
 
 			// build italian searcher

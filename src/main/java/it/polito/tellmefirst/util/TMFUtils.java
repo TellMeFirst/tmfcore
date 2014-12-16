@@ -121,7 +121,7 @@ public class TMFUtils {
 		return unchecked(ret, null);
 	}
 
-	public static void uncheckedVoid(Behaviour ret) {
+	public static void unchecked(Behaviour ret) {
 		try {
 			ret.behaviour();
 		} catch (Exception e) {
