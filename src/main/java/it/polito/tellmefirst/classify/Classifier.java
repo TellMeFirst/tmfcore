@@ -115,7 +115,7 @@ public class Classifier {
 		LOG.debug("[classifyLongText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		String longText = text.getText();
-		ArrayList<String> pieces = new ArrayList<String>();
+		ArrayList<String> pieces = new ArrayList<>();
 
 		// split long text in smaller parts and call
 		// getContextQueryForKBasedDisambiguator() for each one
@@ -139,8 +139,8 @@ public class Classifier {
 			}
 			n++;
 		}
-		ArrayList<ScoreDoc> mergedHitList = new ArrayList<ScoreDoc>();
-		ArrayList<ClassiThread> threadList = new ArrayList<ClassiThread>();
+		ArrayList<ScoreDoc> mergedHitList = new ArrayList<>();
+		ArrayList<ClassiThread> threadList = new ArrayList<>();
 		for (String textPiece : pieces) {
 			ClassiThread thread = new ClassiThread(contextLuceneManager,
 					searcher, textPiece);
@@ -150,14 +150,13 @@ public class Classifier {
 		for (ClassiThread thread : threadList) {
 			thread.join();
 			ScoreDoc[] hits = thread.getHits();
-			ArrayList<ScoreDoc> hitList = new ArrayList<ScoreDoc>();
+			ArrayList<ScoreDoc> hitList = new ArrayList<>();
 			for (int b = 0; b < numOfTopics && b < hits.length; b++) {
 				hitList.add(hits[b]);
 			}
 			mergedHitList.addAll(hitList);
 		}
-		HashMap<Integer, Integer> scoreDocCount =
-				new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> scoreDocCount = new HashMap<>();
 		for (ScoreDoc scoreDoc : mergedHitList) {
 			Integer count = scoreDocCount.get(scoreDoc.doc);
 			scoreDocCount.put(scoreDoc.doc, (count == null) ? 1 : count + 1);
@@ -165,7 +164,7 @@ public class Classifier {
 		HashMap<Integer, Integer> sortedMap = TMFUtils
 				.sortHashMapIntegers(scoreDocCount);
 		LinkedHashMap<ScoreDoc, Integer> sortedMapWithScore = new
-				LinkedHashMap<ScoreDoc, Integer>();
+				LinkedHashMap<>();
 		for (int docnum : sortedMap.keySet()) {
 			Document doc = searcher.getFullDocument(docnum); // XXX
 			boolean flag = true;
@@ -228,7 +227,7 @@ public class Classifier {
 			String lang) throws IOException {
 		LOG.debug("[classifyCore] - BEGIN");
 
-		ArrayList<String[]> result = new ArrayList<String[]>();
+		ArrayList<String[]> result = new ArrayList<>();
 
 		if (hits.length == 0) {
 			LOG.error("No results given by Lucene query from Classify!!");
@@ -337,10 +336,10 @@ public class Classifier {
 	private ArrayList<ScoreDoc> sortByRank(
 			LinkedHashMap<ScoreDoc, Integer> inputList) {
 		LOG.debug("[sortByRank] - BEGIN");
-		ArrayList<ScoreDoc> result = new ArrayList<ScoreDoc>();
+		ArrayList<ScoreDoc> result = new ArrayList<>();
 		LinkedMap apacheMap = new LinkedMap(inputList);
 		for (int i = 0; i < apacheMap.size() - 1; i++) {
-			TreeMap<Float, ScoreDoc> treeMap = new TreeMap<Float, ScoreDoc>(
+			TreeMap<Float, ScoreDoc> treeMap = new TreeMap<>(
 					Collections.reverseOrder());
 			do {
 				i++;
