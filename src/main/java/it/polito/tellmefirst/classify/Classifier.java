@@ -46,6 +46,11 @@ public class Classifier {
 	SimpleSearcher searcher;
 	static Log LOG = LogFactory.getLog(Classifier.class);
 
+	/**
+	 * Instantiate the classifier.
+	 * @param lang The classifier language ("it" or "en").
+	 * @since 1.0.0.0.
+	 */
 	public Classifier(String lang) {
 		LOG.debug("[constructor] - BEGIN");
 		if (lang.equals("it")) {
@@ -59,6 +64,24 @@ public class Classifier {
 		LOG.debug("[constructor] - END");
 	}
 
+	/**
+	 * Classify a piece of text. This function is implemented by different
+	 * algorithms depending on the input text size; if the input text is
+	 * less than 1,000 words, classifyShortText() is called, otherwise this
+	 * function will invoke an algorithm that splits the text in chunks,
+	 * calls classifyShortText() on each chunk, and then merge the results.
+	 *
+	 * @param textString the input piece of text.
+	 * @param numOfTopics maximum number of topics to be returned (less
+	 *        topics may be returned).
+	 * @param lang the classifier language (yes, this argument is
+	 *        redundant and will be removed in the future).
+	 * @return A list of vectors of strings. Each vector shall be composed
+	 *         of seven strings: the URI, the label, the title, the
+	 *         score, the merged type, the image, and the wiki link.
+	 *
+	 * @since 1.0.0.0.
+	 */
 	public ArrayList<String[]> classify(String textString, int numOfTopics,
 			String lang) throws InterruptedException, IOException,
 			ParseException {
@@ -168,7 +191,7 @@ public class Classifier {
 	 *
 	 * @param textString the input piece of text.
 	 * @param numOfTopics maximum number of topics to be returned (less
-	 *        topics may be returned.
+	 *        topics may be returned).
 	 * @param lang the classifier language (yes, this argument is
 	 *        redundant and will be removed in the future).
 	 * @return A list of vectors of strings. Each vector shall be composed
