@@ -128,25 +128,4 @@ public class IndexesUtil {
 		LOG.debug("[getImage] - END");
 		return result;
 	}
-
-	public static String getSameAsFromEngToIta(String engUri) {
-		LOG.debug("[getSameAsFromEngToIta] - BEGIN");
-		String result = "";
-		try {
-			IndexSearcher indexSearcher = ITALIAN_CORPUS_INDEX_SEARCHER.getIndexSearcher();
-			Query q = new TermQuery(new Term("SAMEAS", engUri));
-			TopDocs hits = indexSearcher.search(q, 1);
-			if (hits.totalHits != 0) {
-				int docId = hits.scoreDocs[0].doc;
-				org.apache.lucene.document.Document doc = ITALIAN_CORPUS_INDEX_SEARCHER.getFullDocument(docId);
-				if (doc.getField("URI") != null) {
-					result = doc.getField("URI").stringValue();
-				}
-			}
-		} catch (Exception e) {
-			LOG.error("[getSameAsFromEngToIta] - EXCEPTION: ", e);
-		}
-		LOG.debug("[getSameAsFromEngToIta] - END");
-		return result;
-	}
 }
