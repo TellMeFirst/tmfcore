@@ -238,12 +238,12 @@ public class Classifier {
 				String[] arrayOfFields = new String[7];
 
 				Document doc = searcher.getFullDocument(hits[i].doc);
-				String uri = "";
-				String visLabel = "";
-				String title = "";
-				String mergedTypes = "";
+				String uri;
+				String visLabel;
+				String title;
+				String mergedTypes;
 				String image;
-				String wikilink = "";
+				String wikilink;
 
 				if (lang.equals("italian")) {
 					String italianUri = "http://it.dbpedia.org/resource/"
