@@ -21,13 +21,14 @@ import it.polito.tellmefirst.lucene.IndexesUtil;
 import it.polito.tellmefirst.lucene.LuceneManager;
 import it.polito.tellmefirst.lucene.SimpleSearcher;
 import it.polito.tellmefirst.util.TMFUtils;
+import static it.polito.tellmefirst.util.TMFUtils.unchecked;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import static java.util.Optional.ofNullable;
 import java.util.TreeMap;
 import org.apache.commons.collections.map.LinkedMap;
@@ -44,58 +45,90 @@ public class Classifier {
 
 	LuceneManager contextLuceneManager;
 	SimpleSearcher searcher;
+	String language;
 	static Log LOG = LogFactory.getLog(Classifier.class);
 
+	/**
+	 * Instantiate the classifier.
+	 * @param lang The classifier language ("it" or "en").
+	 * @since 1.0.0.0.
+	 */
 	public Classifier(String lang) {
+		this(lang, null);
+	}
+
+	/**
+	 * Instantiate the classifier with custom searcher.
+	 * @param lang The classifier language ("it" or "en").
+	 * @param sea The custom searcher object.
+	 * @since 3.0.0.0.
+	 */
+	public Classifier(String lang, SimpleSearcher sea) {
 		LOG.debug("[constructor] - BEGIN");
 		if (lang.equals("it")) {
 			LOG.info("Initializing italian Classifier...");
-			searcher = IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
+			searcher = (sea != null) ? sea :
+					IndexesUtil.ITALIAN_CORPUS_INDEX_SEARCHER;
+			language = "italian";
 		} else {
 			LOG.info("Initializing english Classifier...");
-			searcher = IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
+			searcher = (sea != null) ? sea :
+					IndexesUtil.ENGLISH_CORPUS_INDEX_SEARCHER;
+			language = "english";
 		}
 		contextLuceneManager = searcher.getLuceneManager();
 		LOG.debug("[constructor] - END");
 	}
 
-	public ArrayList<String[]> classify(String textString, int numOfTopics,
-			String lang) throws InterruptedException, IOException,
-			ParseException {
-		LOG.debug("[classify] - BEGIN");
+	/**
+	 * Classify a piece of text. This function is implemented by different
+	 * algorithms depending on the input text size; if the input text is
+	 * less than 1,000 words, classifyShortText() is called, otherwise this
+	 * function will invoke an algorithm that splits the text in chunks,
+	 * calls classifyShortText() on each chunk, and then merge the results.
+	 *
+	 * @param textString the input piece of text.
+	 * @param numOfTopics maximum number of topics to be returned (less
+	 *        topics may be returned).
+	 * @return A list of vectors of strings. Each vector shall be composed
+	 *         of seven strings: the URI, the label, the title, the
+	 *         score, the merged type, the image, and the wiki link.
+	 *
+	 * @since 1.0.0.0.
+	 */
+	public List<String[]> classify(String textString,
+			int numOfTopics) {
+		return unchecked(() -> {
+			LOG.debug("[classify] - BEGIN");
 
-		ArrayList<String[]> result;
-		Text text = new Text(textString);
+			List<String[]> result;
+			Text text = new Text(textString);
 
-		int totalNumWords = TMFUtils.countWords(textString);
-		// no prod
-		LOG.debug("TOTAL WORDS: " + totalNumWords);
-		if (totalNumWords > 1000) {
-			// no prod
-			LOG.debug("Text contains " + totalNumWords
-					+ " words. We'll use Classify for long texts.");
-			result = classifyLongText(text, numOfTopics, lang);
-		} else {
-			// no prod
-			LOG.debug("Text contains " + totalNumWords
-					+ " words. We'll use Classify for short texts.");
-			result = classifyShortText(text, numOfTopics, lang);
-		}
-		LOG.debug("[classify] - END");
+			int totalNumWords = TMFUtils.countWords(textString);
+			LOG.debug("TOTAL WORDS: " + totalNumWords);
+			if (totalNumWords > 1000) {
+				LOG.debug("Text contains " + totalNumWords
+						+ " words. We'll use Classify for long texts.");
+				result = classifyLongText(text, numOfTopics);
+			} else {
+				LOG.debug("Text contains " + totalNumWords
+						+ " words. We'll use Classify for short texts.");
+				result = classifyShortText(text, numOfTopics);
+			}
+			LOG.debug("[classify] - END");
 
-		return result;
+			return result;
+		});
 	}
 
-	public ArrayList<String[]> classifyLongText(Text text, int numOfTopics,
-			String lang) throws InterruptedException,
-			IOException {
+	private List<String[]> classifyLongText(Text text, int numOfTopics)
+			throws InterruptedException, IOException {
 		LOG.debug("[classifyLongText] - BEGIN");
-		ArrayList<String[]> result;
-		// no prod
+		List<String[]> result;
 		LOG.debug("[classifyLongText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		String longText = text.getText();
-		ArrayList<String> pieces = new ArrayList<String>();
+		List<String> pieces = new ArrayList<>();
 
 		// split long text in smaller parts and call
 		// getContextQueryForKBasedDisambiguator() for each one
@@ -106,47 +139,45 @@ public class Classifier {
 			String secondPart = StringUtils.join(longText.split(" "), " ",
 					1000, TMFUtils.countWords(longText));
 			pieces.add(firstPart);
-			// no prod
-			LOG.debug("Piece n°" + n + " analyzing...");
+			LOG.debug("Piece num" + n + " analyzing...");
 			longText = secondPart;
 			if (TMFUtils.countWords(longText) < 300) {
-				// no prod
 				LOG.debug("Final piece contains "
 						+ TMFUtils.countWords(longText)
 						+ " words. Discarded, because < " + "300 words.");
 			} else if (TMFUtils.countWords(longText) < 1000) {
-				// no prod
 				LOG.debug("Final piece contains "
 						+ TMFUtils.countWords(longText) + " words.");
 				pieces.add(longText);
 			}
 			n++;
 		}
-		ArrayList<ScoreDoc> mergedHitList = new ArrayList<ScoreDoc>();
-		ArrayList<ClassiThread> threadList = new ArrayList<ClassiThread>();
-		for (String textPiece : pieces) {
-			ClassiThread thread = new ClassiThread(contextLuceneManager,
-					searcher, textPiece);
+		List<ScoreDoc> mergedHitList = new ArrayList<>();
+		List<ClassiThread> threadList = new ArrayList<>();
+		pieces.stream().map((textPiece) -> new ClassiThread(
+				contextLuceneManager, searcher, textPiece)).map((thread) -> {
 			thread.start();
+			return thread;
+		}).forEach((thread) -> {
 			threadList.add(thread);
-		}
+		});
 		for (ClassiThread thread : threadList) {
 			thread.join();
 			ScoreDoc[] hits = thread.getHits();
-			ArrayList<ScoreDoc> hitList = new ArrayList<ScoreDoc>();
+			List<ScoreDoc> hitList = new ArrayList<>();
 			for (int b = 0; b < numOfTopics && b < hits.length; b++) {
 				hitList.add(hits[b]);
 			}
 			mergedHitList.addAll(hitList);
 		}
-		HashMap<Integer, Integer> scoreDocCount = new HashMap<Integer, Integer>();
-		for (ScoreDoc scoreDoc : mergedHitList) {
+		Map<Integer, Integer> scoreDocCount = new HashMap<>();
+		mergedHitList.stream().forEach((scoreDoc) -> {
 			Integer count = scoreDocCount.get(scoreDoc.doc);
 			scoreDocCount.put(scoreDoc.doc, (count == null) ? 1 : count + 1);
-		}
-		HashMap<Integer, Integer> sortedMap = TMFUtils
-				.sortHashMapIntegers(scoreDocCount);
-		LinkedHashMap<ScoreDoc, Integer> sortedMapWithScore = new LinkedHashMap<ScoreDoc, Integer>();
+		});
+		Map<Integer, Integer> sortedMap = TMFUtils
+				.sortIntegersMap(scoreDocCount);
+		Map<ScoreDoc, Integer> sortedMapWithScore = new LinkedHashMap<>();
 		for (int docnum : sortedMap.keySet()) {
 			Document doc = searcher.getFullDocument(docnum); // XXX
 			boolean flag = true;
@@ -157,12 +188,12 @@ public class Classifier {
 				}
 			}
 		}
-		ArrayList<ScoreDoc> finalHitsList = sortByRank(sortedMapWithScore);
+		List<ScoreDoc> finalHitsList = sortByRank(sortedMapWithScore);
 		ScoreDoc[] hits = new ScoreDoc[finalHitsList.size()];
 		for (int i = 0; i < finalHitsList.size(); i++) {
 			hits[i] = finalHitsList.get(i);
 		}
-		result = classifyCore(hits, numOfTopics, lang);
+		result = postProcess(hits, numOfTopics);
 		LOG.debug("[classifyLongText] - END");
 		return result;
 	}
@@ -175,9 +206,7 @@ public class Classifier {
 	 *
 	 * @param textString the input piece of text.
 	 * @param numOfTopics maximum number of topics to be returned (less
-	 *        topics may be returned.
-	 * @param lang the classifier language (yes, this argument is
-	 *        redundant and will be removed in the future).
+	 *        topics may be returned).
 	 * @return A list of vectors of strings. Each vector shall be composed
 	 *         of seven strings: the URI, the label, the title, the
 	 *         score, the merged type, the image, and the wiki link.
@@ -185,134 +214,133 @@ public class Classifier {
 	 * @since 2.0.0.0.
 	 */
 	public List<String[]> classifyShortText(String textString,
-			int numOfTopics, String lang) throws InterruptedException,
-			IOException, ParseException {
-		return classifyShortText(new Text(textString), numOfTopics, lang);
+			int numOfTopics) {
+		return unchecked(() -> {
+			return classifyShortText(new Text(textString),
+					numOfTopics);
+		});
 	}
 
-	public ArrayList<String[]> classifyShortText(Text text, int numOfTopics,
-			String lang) throws ParseException, IOException {
+	private List<String[]> classifyShortText(Text text, int numOfTopics)
+			throws ParseException, IOException {
 		LOG.debug("[classifyShortText] - BEGIN");
-		ArrayList<String[]> result;
-		// no prod
+		List<String[]> result;
 		LOG.debug("[classifyShortText] - We're using as analyzer: "
 				+ contextLuceneManager.getLuceneDefaultAnalyzer());
 		Query query = contextLuceneManager.getQueryForContext(text);
 		ScoreDoc[] hits = searcher.getHits(query);
-		result = classifyCore(hits, numOfTopics, lang);
+		result = postProcess(hits, numOfTopics);
 		LOG.debug("[classifyShortText] - END");
 		return result;
 	}
 
-	public ArrayList<String[]> classifyCore(ScoreDoc[] hits, int numOfTopics, String lang) throws IOException {
+	private List<String[]> postProcess(ScoreDoc[] hits, int numOfTopics)
+			throws IOException {
 		LOG.debug("[classifyCore] - BEGIN");
 
-		ArrayList<String[]> result = new ArrayList<String[]>();
+		List<String[]> result = new ArrayList<>();
 
-		if (hits.length == 0) {
-			LOG.error("No results given by Lucene query from Classify!!");
-		} else {
+		for (int i = 0; i < numOfTopics && i < hits.length; i++) {
 
-			for (int i = 0; i < numOfTopics; i++) {
+			String[] arrayOfFields = new String[7];
 
-				String[] arrayOfFields = new String[7];
+			Document doc = searcher.getFullDocument(hits[i].doc);
+			String uri;
+			String visLabel;
+			String title;
+			String mergedTypes;
+			String image;
+			String wikilink;
 
-				Document doc = searcher.getFullDocument(hits[i].doc);
-				String uri = "";
-				String visLabel = "";
-				String title = "";
-				String mergedTypes = "";
-				String image;
-				String wikilink = "";
+			if (language.equals("italian")) {
+				String italianUri = "http://it.dbpedia.org/resource/"
+						+ doc.getField("URI").stringValue();
+				wikilink = "http://it.wikipedia.org/wiki/"
+						+ doc.getField("URI").stringValue();
 
-				if (lang.equals("italian")) {
-					String italianUri = "http://it.dbpedia.org/resource/"
-							+ doc.getField("URI").stringValue();
-					wikilink = "http://it.wikipedia.org/wiki/"
-							+ doc.getField("URI").stringValue();
-
-					// Italian: resource without a corresponding in English DBpedia
-					if (doc.getField("SAMEAS") == null) {
-						uri = italianUri;
-						title = doc.getField("TITLE").stringValue();
-						visLabel = title.replaceAll("\\(.+?\\)", "").trim();
-						Field[] types = doc.getFields("TYPE");
-						StringBuilder typesString = new StringBuilder();
-						for (Field value : types) {
-							typesString.append(value.stringValue() + "#");
-						}
-						mergedTypes = typesString.toString();
-						image = ofNullable(doc.getField("IMAGE"))
-								.flatMap(y -> ofNullable(y.stringValue()))
-								.orElse("");
-
-					//
-						// Italian: resource with a corresponding in English DBpedia.
-						//
-						// Note: in this case we use getImage() to get the image URL, rather
-						// than the "IMAGE" field, under the assumption that the english
-						// version of DBPedia is more rich.
-						//
-					} else {
-						uri = doc.getField("SAMEAS").stringValue();
-						title = IndexesUtil.getTitle(uri, "en");
-						visLabel = doc.getField("TITLE").stringValue()
-								.replaceAll("\\(.+?\\)", "").trim();
-						image = IndexesUtil.getImage(uri, "en");
-						ArrayList<String> typesArray = IndexesUtil.getTypes(uri, "en");
-						StringBuilder typesString = new StringBuilder();
-						for (String type : typesArray) {
-							typesString.append(type + "#");
-						}
-						mergedTypes = typesString.toString();
-					}
-
-					// English
-				} else {
-					uri = "http://dbpedia.org/resource/" + doc.getField("URI").stringValue();
-					wikilink = "http://en.wikipedia.org/wiki/" + doc.getField("URI").stringValue();
+				// Italian: resource without a corresponding
+				// in-English DBpedia
+				if (doc.getField("SAMEAS") == null) {
+					uri = italianUri;
 					title = doc.getField("TITLE").stringValue();
 					visLabel = title.replaceAll("\\(.+?\\)", "").trim();
-					image = ofNullable(doc.getField("IMAGE"))
-							.flatMap(y -> ofNullable(y.stringValue()))
-							.orElse("");
 					Field[] types = doc.getFields("TYPE");
 					StringBuilder typesString = new StringBuilder();
 					for (Field value : types) {
-						typesString.append(value.stringValue() + "#");
+						typesString.append(value.stringValue()).append("#");
 					}
+					mergedTypes = typesString.toString();
+					image = ofNullable(doc.getField("IMAGE"))
+							.flatMap(y -> ofNullable(y.stringValue()))
+							.orElse("");
+
+				//
+				// Italian: resource with a corresponding in-English
+				// DBpedia.
+				//
+				// Note: in this case we use getImage() to get the
+				// image URL, rather than the "IMAGE" field, under the
+				// assumption that the english version of DBPedia is
+				// more rich.
+				//
+				} else {
+					uri = doc.getField("SAMEAS").stringValue();
+					title = searcher.getTitle(uri);
+					visLabel = doc.getField("TITLE").stringValue()
+							.replaceAll("\\(.+?\\)", "").trim();
+					image = searcher.getImage(uri);
+					List<String> typesArray = searcher.getTypes(uri);
+					StringBuilder typesString = new StringBuilder();
+					typesArray.stream().forEach((type) -> {
+						typesString.append(type).append("#");
+					});
 					mergedTypes = typesString.toString();
 				}
 
-				LOG.debug("[classifyCore] - uri = " + uri);
-				LOG.debug("[classifyCore] - title = " + title);
-				LOG.debug("[classifyCore] - wikilink = " + wikilink);
-				// LOG.debug("[classifyCore] - getWikiHtmlUrl = " +
-				// getWikiHtmlUrl);
-
-				String score = String.valueOf(hits[i].score);
-				arrayOfFields[0] = uri;
-				arrayOfFields[1] = visLabel;
-				arrayOfFields[2] = title;
-				arrayOfFields[3] = score;
-				arrayOfFields[4] = mergedTypes;
-				arrayOfFields[5] = image;
-				arrayOfFields[6] = wikilink;
-
-				result.add(arrayOfFields);
+			} else {
+				uri = "http://dbpedia.org/resource/"
+						+ doc.getField("URI").stringValue();
+				wikilink = "http://en.wikipedia.org/wiki/"
+						+ doc.getField("URI").stringValue();
+				title = doc.getField("TITLE").stringValue();
+				visLabel = title.replaceAll("\\(.+?\\)", "").trim();
+				image = ofNullable(doc.getField("IMAGE"))
+						.flatMap(y -> ofNullable(y.stringValue()))
+						.orElse("");
+				Field[] types = doc.getFields("TYPE");
+				StringBuilder typesString = new StringBuilder();
+				for (Field value : types) {
+					typesString.append(value.stringValue()).append("#");
+				}
+				mergedTypes = typesString.toString();
 			}
+
+			LOG.debug("[classifyCore] - uri = " + uri);
+			LOG.debug("[classifyCore] - title = " + title);
+			LOG.debug("[classifyCore] - wikilink = " + wikilink);
+
+			String score = String.valueOf(hits[i].score);
+			arrayOfFields[0] = uri;
+			arrayOfFields[1] = visLabel;
+			arrayOfFields[2] = title;
+			arrayOfFields[3] = score;
+			arrayOfFields[4] = mergedTypes;
+			arrayOfFields[5] = image;
+			arrayOfFields[6] = wikilink;
+
+			result.add(arrayOfFields);
 		}
 
 		LOG.debug("[classifyCore] - END size=" + result.size());
 		return result;
 	}
 
-	public ArrayList<ScoreDoc> sortByRank(LinkedHashMap<ScoreDoc, Integer> inputList) {
+	private List<ScoreDoc> sortByRank(Map<ScoreDoc, Integer> inputList) {
 		LOG.debug("[sortByRank] - BEGIN");
-		ArrayList<ScoreDoc> result = new ArrayList<ScoreDoc>();
+		List<ScoreDoc> result = new ArrayList<>();
 		LinkedMap apacheMap = new LinkedMap(inputList);
 		for (int i = 0; i < apacheMap.size() - 1; i++) {
-			TreeMap<Float, ScoreDoc> treeMap = new TreeMap<Float, ScoreDoc>(
+			Map<Float, ScoreDoc> treeMap = new TreeMap<>(
 					Collections.reverseOrder());
 			do {
 				i++;
@@ -321,12 +349,11 @@ public class Classifier {
 			} while (i < apacheMap.size()
 					&& apacheMap.getValue(i) == apacheMap.getValue(i - 1));
 			i--;
-			for (Float score : treeMap.keySet()) {
+			treeMap.keySet().stream().forEach((score) -> {
 				result.add(treeMap.get(score));
-			}
+			});
 		}
 		LOG.debug("[sortByRank] - END");
 		return result;
 	}
-
 }
