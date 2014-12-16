@@ -83,7 +83,7 @@ public class Classifier {
 		return result;
 	}
 
-	public ArrayList<String[]> classifyLongText(Text text, int numOfTopics,
+	private ArrayList<String[]> classifyLongText(Text text, int numOfTopics,
 			String lang) throws InterruptedException,
 			IOException {
 		LOG.debug("[classifyLongText] - BEGIN");
@@ -183,7 +183,7 @@ public class Classifier {
 		return classifyShortText(new Text(textString), numOfTopics, lang);
 	}
 
-	public ArrayList<String[]> classifyShortText(Text text, int numOfTopics,
+	private ArrayList<String[]> classifyShortText(Text text, int numOfTopics,
 			String lang) throws ParseException, IOException {
 		LOG.debug("[classifyShortText] - BEGIN");
 		ArrayList<String[]> result;
@@ -196,7 +196,7 @@ public class Classifier {
 		return result;
 	}
 
-	public ArrayList<String[]> classifyCore(ScoreDoc[] hits, int numOfTopics, String lang) throws IOException {
+	private ArrayList<String[]> classifyCore(ScoreDoc[] hits, int numOfTopics, String lang) throws IOException {
 		LOG.debug("[classifyCore] - BEGIN");
 
 		ArrayList<String[]> result = new ArrayList<String[]>();
@@ -299,7 +299,7 @@ public class Classifier {
 		return result;
 	}
 
-	public ArrayList<ScoreDoc> sortByRank(LinkedHashMap<ScoreDoc, Integer> inputList) {
+	private ArrayList<ScoreDoc> sortByRank(LinkedHashMap<ScoreDoc, Integer> inputList) {
 		LOG.debug("[sortByRank] - BEGIN");
 		ArrayList<ScoreDoc> result = new ArrayList<ScoreDoc>();
 		LinkedMap apacheMap = new LinkedMap(inputList);
