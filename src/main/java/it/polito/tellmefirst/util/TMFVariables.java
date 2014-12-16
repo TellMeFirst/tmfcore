@@ -16,7 +16,6 @@
  */
 package it.polito.tellmefirst.util;
 
-import java.io.File;
 import static it.polito.tellmefirst.util.TMFUtils.unchecked;
 import java.io.File;
 import java.io.FileInputStream;
