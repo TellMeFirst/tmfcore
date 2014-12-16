@@ -58,38 +58,6 @@ public class IndexesUtil {
 		LOG.debug("[initializator] - END");
 	}
 
-	public static ArrayList<String> getBagOfConcepts(String uri, String lang) {
-		LOG.debug("[getBagOfConcepts] - BEGIN");
-		ArrayList<String> result = new ArrayList<String>();
-		try {
-			String KBPath = (lang.equals("it")) ? TMFVariables.KB_IT : TMFVariables.KB_EN;
-			MMapDirectory directory = new MMapDirectory(new File(KBPath));
-			IndexReader reader = IndexReader.open(directory, true);
-			IndexSearcher is = new IndexSearcher(directory, true);
-			Query q = new TermQuery(new Term("URI", uri));
-			TopDocs hits = is.search(q, 1);
-			is.close();
-			if (hits.totalHits != 0) {
-				int docId = hits.scoreDocs[0].doc;
-				org.apache.lucene.document.Document doc = reader.document(docId);
-				String wikilinksMerged = doc.getField("KB").stringValue();
-				String[] wikiSplits = wikilinksMerged.split(" ");
-				//no prod
-				LOG.debug("Bag of concepts for the resource " + uri + ": ");
-				for (String s : wikiSplits) {
-					result.add(s);
-					//no prod
-					LOG.debug("* " + s);
-				}
-			}
-			reader.close();
-		} catch (Exception e) {
-			LOG.error("[getBagOfConcepts] - EXCEPTION: ", e);
-		}
-		LOG.debug("[getBagOfConcepts] - END");
-		return result;
-	}
-
 	public static ArrayList<String> getResidualBagOfConcepts(String uri, String lang) {
 		LOG.debug("[getResidualBagOfConcepts] - BEGIN");
 		ArrayList<String> result = new ArrayList<String>();
