@@ -155,14 +155,16 @@ public class Classifier {
 			}
 			mergedHitList.addAll(hitList);
 		}
-		HashMap<Integer, Integer> scoreDocCount = new HashMap<Integer, Integer>();
+		HashMap<Integer, Integer> scoreDocCount =
+				new HashMap<Integer, Integer>();
 		for (ScoreDoc scoreDoc : mergedHitList) {
 			Integer count = scoreDocCount.get(scoreDoc.doc);
 			scoreDocCount.put(scoreDoc.doc, (count == null) ? 1 : count + 1);
 		}
 		HashMap<Integer, Integer> sortedMap = TMFUtils
 				.sortHashMapIntegers(scoreDocCount);
-		LinkedHashMap<ScoreDoc, Integer> sortedMapWithScore = new LinkedHashMap<ScoreDoc, Integer>();
+		LinkedHashMap<ScoreDoc, Integer> sortedMapWithScore = new
+				LinkedHashMap<ScoreDoc, Integer>();
 		for (int docnum : sortedMap.keySet()) {
 			Document doc = searcher.getFullDocument(docnum); // XXX
 			boolean flag = true;
@@ -219,7 +221,8 @@ public class Classifier {
 		return result;
 	}
 
-	private ArrayList<String[]> classifyCore(ScoreDoc[] hits, int numOfTopics, String lang) throws IOException {
+	private ArrayList<String[]> classifyCore(ScoreDoc[] hits, int numOfTopics,
+			String lang) throws IOException {
 		LOG.debug("[classifyCore] - BEGIN");
 
 		ArrayList<String[]> result = new ArrayList<String[]>();
@@ -246,7 +249,8 @@ public class Classifier {
 					wikilink = "http://it.wikipedia.org/wiki/"
 							+ doc.getField("URI").stringValue();
 
-					// Italian: resource without a corresponding in English DBpedia
+					// Italian: resource without a corresponding
+					// in-English DBpedia
 					if (doc.getField("SAMEAS") == null) {
 						uri = italianUri;
 						title = doc.getField("TITLE").stringValue();
@@ -261,12 +265,14 @@ public class Classifier {
 								.flatMap(y -> ofNullable(y.stringValue()))
 								.orElse("");
 
-					//
-						// Italian: resource with a corresponding in English DBpedia.
 						//
-						// Note: in this case we use getImage() to get the image URL, rather
-						// than the "IMAGE" field, under the assumption that the english
-						// version of DBPedia is more rich.
+						// Italian: resource with a corresponding in-English
+						// DBpedia.
+						//
+						// Note: in this case we use getImage() to get the
+						// image URL, rather than the "IMAGE" field, under the
+						// assumption that the english version of DBPedia is
+						// more rich.
 						//
 					} else {
 						uri = doc.getField("SAMEAS").stringValue();
@@ -274,7 +280,8 @@ public class Classifier {
 						visLabel = doc.getField("TITLE").stringValue()
 								.replaceAll("\\(.+?\\)", "").trim();
 						image = IndexesUtil.getImage(uri, "en");
-						ArrayList<String> typesArray = IndexesUtil.getTypes(uri, "en");
+						ArrayList<String> typesArray = IndexesUtil.getTypes(
+								uri, "en");
 						StringBuilder typesString = new StringBuilder();
 						for (String type : typesArray) {
 							typesString.append(type + "#");
@@ -284,8 +291,10 @@ public class Classifier {
 
 					// English
 				} else {
-					uri = "http://dbpedia.org/resource/" + doc.getField("URI").stringValue();
-					wikilink = "http://en.wikipedia.org/wiki/" + doc.getField("URI").stringValue();
+					uri = "http://dbpedia.org/resource/"
+							+ doc.getField("URI").stringValue();
+					wikilink = "http://en.wikipedia.org/wiki/"
+							+ doc.getField("URI").stringValue();
 					title = doc.getField("TITLE").stringValue();
 					visLabel = title.replaceAll("\\(.+?\\)", "").trim();
 					image = ofNullable(doc.getField("IMAGE"))
@@ -322,7 +331,8 @@ public class Classifier {
 		return result;
 	}
 
-	private ArrayList<ScoreDoc> sortByRank(LinkedHashMap<ScoreDoc, Integer> inputList) {
+	private ArrayList<ScoreDoc> sortByRank(
+			LinkedHashMap<ScoreDoc, Integer> inputList) {
 		LOG.debug("[sortByRank] - BEGIN");
 		ArrayList<ScoreDoc> result = new ArrayList<ScoreDoc>();
 		LinkedMap apacheMap = new LinkedMap(inputList);
@@ -343,5 +353,4 @@ public class Classifier {
 		LOG.debug("[sortByRank] - END");
 		return result;
 	}
-
 }
