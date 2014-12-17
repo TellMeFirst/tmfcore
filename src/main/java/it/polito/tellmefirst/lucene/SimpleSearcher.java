@@ -87,6 +87,7 @@ public class SimpleSearcher {
 		return indexSearcher;
 	}
 
+	// Used by the Italian classifier
 	public String getTitle(String uri) throws IOException {
 		LOG.debug("[getTitle] - BEGIN");
 		String result = "";
@@ -105,6 +106,7 @@ public class SimpleSearcher {
 		return result;
 	}
 
+	// Used by the Italian classifier
 	public String getImage(String uri) throws IOException {
 		LOG.debug("[getImage] - BEGIN");
 		String result = "";
@@ -123,6 +125,7 @@ public class SimpleSearcher {
 		return result;
 	}
 
+	// Used by the Italian classifier
 	public List getTypes(String uri) throws IOException {
 		LOG.debug("[getTypes] - BEGIN");
 		List<String> result = new ArrayList<>();
