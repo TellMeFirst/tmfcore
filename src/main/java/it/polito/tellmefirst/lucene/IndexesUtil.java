@@ -32,6 +32,15 @@ public class IndexesUtil {
 	public static SimpleSearcher ITALIAN_CORPUS_INDEX_SEARCHER;
 	public static SimpleSearcher ENGLISH_CORPUS_INDEX_SEARCHER;
 
+	/**
+	 * Initialize the classifiers. This static method initializes the
+	 * italian and the english classifiers under the hood. You must
+	 * call this function after you have constructed an instance of the
+	 * TMFVariables class as described in TMFVariables docs.
+	 *
+	 * If you don't call this method, when you use the classifier you
+	 * will get a NullPointerException in Classifier().
+	 */
 	public static void init() {
 		unchecked(() -> {
 			LOG.debug("[initializator] - BEGIN");
