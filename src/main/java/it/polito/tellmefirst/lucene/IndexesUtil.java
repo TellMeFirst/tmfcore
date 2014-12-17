@@ -40,6 +40,8 @@ public class IndexesUtil {
 	 *
 	 * If you don't call this method, when you use the classifier you
 	 * will get a NullPointerException in Classifier().
+	 *
+	 * @since 2.0.0.0.
 	 */
 	public static void init() {
 		unchecked(() -> {

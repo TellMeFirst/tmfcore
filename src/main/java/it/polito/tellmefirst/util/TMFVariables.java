@@ -45,6 +45,8 @@ public class TMFVariables {
 	 * are later used to instantiate the classifiers. If you don't call
 	 * this constructor, you are likely to get a NullPointer error
 	 * later when you construct the classifier.
+	 *
+	 * @since 3.0.0.0.
 	 */
 	public TMFVariables() {
 		unchecked(() -> {
@@ -61,6 +63,8 @@ public class TMFVariables {
 	 * are later used to instantiate the classifiers. If you don't call
 	 * this constructor, you are likely to get a NullPointer error
 	 * later when you construct the classifier.
+	 *
+	 * @since 1.0.0.0.
 	 */
 	@Deprecated
 	public TMFVariables(String confFile) {
