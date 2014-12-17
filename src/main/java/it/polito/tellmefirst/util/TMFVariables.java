@@ -39,6 +39,15 @@ public class TMFVariables {
 	public static String RESIDUAL_KB_EN;
 	public static Set<String> STOPWORDS_EN;
 
+	/**
+	 * Initialize the internal variables. Yes, this is crazy but you
+	 * must instantiate this class to initialize internal variables that
+	 * are later used to instantiate the classifiers. If you don't call
+	 * this constructor, you are likely to get a NullPointer error
+	 * later when you construct the classifier.
+	 *
+	 * @since 3.0.0.0.
+	 */
 	public TMFVariables() {
 		unchecked(() -> {
 			InputStream configStream = Thread.currentThread()
@@ -48,6 +57,15 @@ public class TMFVariables {
 		});
 	}
 
+	/**
+	 * Initialize the internal variables. Yes, this is crazy but you
+	 * must instantiate this class to initialize internal variables that
+	 * are later used to instantiate the classifiers. If you don't call
+	 * this constructor, you are likely to get a NullPointer error
+	 * later when you construct the classifier.
+	 *
+	 * @since 1.0.0.0.
+	 */
 	@Deprecated
 	public TMFVariables(String confFile) {
 		unchecked(() -> {
