@@ -38,7 +38,7 @@ invoke `classify()` to classify text.
     // is again a String (typically either "en" or "it").
     //
     Classifier classifier = new Classifier(language);
-    List<String[]> res = classifier.classify(text, numTopics, language);
+    List<String[]> res = classifier.classify(text, numTopics);
 
 The `classify()` function follows the traditional TMF policy by which
 large texts are divided in chunks classified separately, and the result
@@ -50,5 +50,4 @@ the Lucene configuration and on the text length, this call may raise an
 exception if the resulting Lucene query is too large.
 
     Classifier classifier = new Classifier(language);
-    List<String[]> res = classifier.classifyShortText(text,
-                                  numTopics, language);
+    List<String[]> res = classifier.classifyShortText(text, numTopics);

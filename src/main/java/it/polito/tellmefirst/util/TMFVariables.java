@@ -16,11 +16,12 @@
  */
 package it.polito.tellmefirst.util;
 
+import static it.polito.tellmefirst.util.TMFUtils.unchecked;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 import java.util.Set;
 
@@ -38,21 +39,59 @@ public class TMFVariables {
 	public static String RESIDUAL_KB_EN;
 	public static Set<String> STOPWORDS_EN;
 
-	public TMFVariables(String confFile) throws IOException {
-		LOG.debug("[constructor] - BEGIN");
-		Properties config = new Properties();
+	/**
+	 * Initialize the internal variables. Yes, this is crazy but you
+	 * must instantiate this class to initialize internal variables that
+	 * are later used to instantiate the classifiers. If you don't call
+	 * this constructor, you are likely to get a NullPointer error
+	 * later when you construct the classifier.
+	 *
+	 * @since 3.0.0.0.
+	 */
+	public TMFVariables() {
+		unchecked(() -> {
+			InputStream configStream = Thread.currentThread()
+				.getContextClassLoader()
+				.getResourceAsStream("tmfcore.properties");
+			init(configStream);
+		});
+	}
 
-		config.load(new FileInputStream(new File(confFile)));
-		CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
-		KB_IT = config.getProperty("kb.it", "").trim();
-		RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
-		STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
+	/**
+	 * Initialize the internal variables. Yes, this is crazy but you
+	 * must instantiate this class to initialize internal variables that
+	 * are later used to instantiate the classifiers. If you don't call
+	 * this constructor, you are likely to get a NullPointer error
+	 * later when you construct the classifier.
+	 *
+	 * @since 1.0.0.0.
+	 */
+	@Deprecated
+	public TMFVariables(String confFile) {
+		unchecked(() -> {
+			InputStream configStream = new FileInputStream(new File(confFile));
+			init(configStream);
+		});
+	}
 
-		CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
-		KB_EN = config.getProperty("kb.en", "").trim();
-		RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
-		STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
+	private void init(InputStream confStream) {
+		unchecked(() -> {
+			LOG.debug("[constructor] - BEGIN");
+			Properties config = new Properties();
 
-		LOG.debug("[constructor] - END");
+			config.load(confStream);
+
+			CORPUS_INDEX_IT = config.getProperty("corpus.index.it", "").trim();
+			KB_IT = config.getProperty("kb.it", "").trim();
+			RESIDUAL_KB_IT = config.getProperty("residualkb.it", "").trim();
+			STOPWORDS_IT = TMFUtils.getStopWords(config.getProperty("stopWords.it", "").trim());
+
+			CORPUS_INDEX_EN = config.getProperty("corpus.index.en", "").trim();
+			KB_EN = config.getProperty("kb.en", "").trim();
+			RESIDUAL_KB_EN = config.getProperty("residualkb.en", "").trim();
+			STOPWORDS_EN = TMFUtils.getStopWords(config.getProperty("stopWords.en", "").trim());
+
+			LOG.debug("[constructor] - END");
+		});
 	}
 }

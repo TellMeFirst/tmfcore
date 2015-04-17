@@ -1,5 +1,5 @@
 /*-
- * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto
+ * Copyright (C) 2012 Federico Cairo, Giuseppe Futia, Federico Benedetto.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,12 +20,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.IndexReader;
-import org.apache.lucene.search.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.index.Term;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.TermQuery;
+import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.TopScoreDocCollector;
 
 public class SimpleSearcher {
 
 	static Log LOG = LogFactory.getLog(SimpleSearcher.class);
+
 	LuceneManager luceneManager;
 	IndexSearcher indexSearcher;
 	IndexReader indexReader;
@@ -33,9 +43,10 @@ public class SimpleSearcher {
 	public SimpleSearcher(LuceneManager lucene) throws IOException {
 		LOG.debug("[constructor] - BEGIN");
 		luceneManager = lucene;
-		//no prod
-		LOG.debug("Opening IndexSearcher for Lucene directory " + luceneManager.getLuceneCorpusIndexDirectory());
-		indexReader = IndexReader.open(luceneManager.getLuceneCorpusIndexDirectory(), true);
+		LOG.debug("Opening IndexSearcher for Lucene directory "
+				+ luceneManager.getLuceneCorpusIndexDirectory());
+		indexReader = IndexReader.open(luceneManager
+				.getLuceneCorpusIndexDirectory(), true);
 		indexSearcher = new IndexSearcher(indexReader);
 		LOG.debug("[constructor] - END");
 	}
@@ -50,15 +61,18 @@ public class SimpleSearcher {
 
 	public ScoreDoc[] getHits(Query query) throws IOException {
 		LOG.debug("[getHits] - BEGIN");
-		ScoreDoc[] result = getTopResults(query, luceneManager.getLimitForQueryResult());
+		ScoreDoc[] result = getTopResults(query,
+				luceneManager.getLimitForQueryResult());
 		LOG.debug("[getHits] - END");
 		return result;
 	}
 
-	private ScoreDoc[] getTopResults(Query query, int numResults) throws IOException {
+	private ScoreDoc[] getTopResults(Query query, int numResults)
+			throws IOException {
 		ScoreDoc[] hits;
 		LOG.debug("[getTopResults] - BEGIN");
-		TopScoreDocCollector collector = TopScoreDocCollector.create(numResults, false);
+		TopScoreDocCollector collector = TopScoreDocCollector.create(
+				numResults, false);
 		indexSearcher.search(query, collector);
 		hits = collector.topDocs().scoreDocs;
 		LOG.debug("[getTopResults] - END");
@@ -71,5 +85,63 @@ public class SimpleSearcher {
 
 	public IndexSearcher getIndexSearcher() {
 		return indexSearcher;
+	}
+
+	// Used by the Italian classifier
+	public String getTitle(String uri) throws IOException {
+		LOG.debug("[getTitle] - BEGIN");
+		String result = "";
+		String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "")
+				.replace("http://dbpedia.org/resource/", "");
+		Query q = new TermQuery(new Term("URI", cleanUri));
+		TopDocs hits = indexSearcher.search(q, 1);
+		if (hits.totalHits != 0) {
+			int docId = hits.scoreDocs[0].doc;
+			Document doc = getFullDocument(docId);
+			if (doc.getField("TITLE").stringValue() != null) {
+				result = doc.getField("TITLE").stringValue();
+			}
+		}
+		LOG.debug("[getTitle] - END");
+		return result;
+	}
+
+	// Used by the Italian classifier
+	public String getImage(String uri) throws IOException {
+		LOG.debug("[getImage] - BEGIN");
+		String result = "";
+		String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "")
+				.replace("http://dbpedia.org/resource/", "");
+		Query q = new TermQuery(new Term("URI", cleanUri));
+		TopDocs hits = indexSearcher.search(q, 1);
+		if (hits.totalHits != 0) {
+			int docId = hits.scoreDocs[0].doc;
+			Document doc = getFullDocument(docId);
+			if (doc.getField("IMAGE") != null) {
+				result = doc.getField("IMAGE").stringValue();
+			}
+		}
+		LOG.debug("[getImage] - END");
+		return result;
+	}
+
+	// Used by the Italian classifier
+	public List getTypes(String uri) throws IOException {
+		LOG.debug("[getTypes] - BEGIN");
+		List<String> result = new ArrayList<>();
+		String cleanUri = uri.replace("http://it.dbpedia.org/resource/", "")
+				.replace("http://dbpedia.org/resource/", "");
+		Query q = new TermQuery(new Term("URI", cleanUri));
+		TopDocs hits = getIndexSearcher().search(q, 1);
+		if (hits.totalHits != 0) {
+			int docId = hits.scoreDocs[0].doc;
+			Document doc = getFullDocument(docId);
+			Field[] types = doc.getFields("TYPE");
+			for (Field type : types) {
+				result.add(type.stringValue());
+			}
+		}
+		LOG.debug("[getTypes] - END");
+		return result;
 	}
 }

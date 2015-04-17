@@ -29,29 +29,29 @@ public class TMFUtils {
 	public static Set<String> getStopWords(String stopwordsFilePath)
 			throws IOException {
 		LOG.debug("[getStopWords] - BEGIN");
-		ArrayList<String> stopWordsList = new ArrayList<String>();
+		List<String> stopWordsList = new ArrayList<>();
 
-		BufferedReader bufferedReader = new BufferedReader(new FileReader(stopwordsFilePath));
-		String line = null;
-		while ((line = bufferedReader.readLine()) != null) {
-			stopWordsList.add(line.trim());
+		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(stopwordsFilePath))) {
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				stopWordsList.add(line.trim());
+			}
 		}
-		bufferedReader.close();
 
-		Set<String> stopwordsSet = new HashSet<String>(stopWordsList);
+		Set<String> stopwordsSet = new HashSet<>(stopWordsList);
 		LOG.debug("[getStopWords] - END");
 		return stopwordsSet;
 	}
 
 	// take a look at: http://www.lampos.net/sort-hashmap
-	public static LinkedHashMap sortHashMapIntegers(HashMap passedMap) {
+	public static Map sortIntegersMap(Map passedMap) {
 		LOG.debug("[sortHashMapIntegers] - BEGIN");
 		List mapKeys = new ArrayList(passedMap.keySet());
 		List mapValues = new ArrayList(passedMap.values());
 		Collections.sort(mapValues);
 		Collections.reverse(mapValues);
 		Collections.sort(mapKeys);
-		LinkedHashMap sortedMap = new LinkedHashMap();
+		Map sortedMap = new LinkedHashMap();
 		Iterator valueIt = mapValues.iterator();
 		while (valueIt.hasNext()) {
 			Object val = valueIt.next();
@@ -119,6 +119,14 @@ public class TMFUtils {
 
 	public static <T> T unchecked(Ret<T> ret) {
 		return unchecked(ret, null);
+	}
+
+	public static void unchecked(Behaviour ret) {
+		try {
+			ret.behaviour();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	public static <T> T uncheck(Ret<T> ret, T defaultValue) {

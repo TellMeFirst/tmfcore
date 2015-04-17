@@ -23,14 +23,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import it.polito.tellmefirst.lucene.LuceneManager;
+import java.io.IOException;
+import org.apache.lucene.queryParser.ParseException;
 
 public class ClassiThread extends Thread {
 
 	static Log LOG = LogFactory.getLog(ClassiThread.class);
 	private ScoreDoc[] hits;
-	private LuceneManager contextLuceneManager;
-	private SimpleSearcher simpleSearcher;
-	private String textPiece;
+	private final LuceneManager contextLuceneManager;
+	private final SimpleSearcher simpleSearcher;
+	private final String textPiece;
 
 	public ClassiThread(
 			LuceneManager contextLuceneManager,
@@ -43,18 +45,18 @@ public class ClassiThread extends Thread {
 		LOG.debug("[constructor] - END");
 	}
 
+	@Override
 	public void run() {
 		LOG.debug("[run] - BEGIN");
-		//no prod
 		LOG.debug("Thread " + this.getId() + " started.");
 		Query query;
 		try {
 			query = contextLuceneManager.getQueryForContext(new Text(textPiece));
 			hits = simpleSearcher.getHits(query);
-		} catch (Exception e) {
+		} catch (ParseException | IOException e) {
 			LOG.error("[run] - EXCEPTION: ", e);
+			// XXX: is suppression exception here sensible?
 		}
-		//no prod
 		LOG.debug("Thread " + this.getId() + " finished.");
 		LOG.debug("[run] - END");
 	}

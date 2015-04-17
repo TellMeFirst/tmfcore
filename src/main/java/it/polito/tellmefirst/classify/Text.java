@@ -18,7 +18,7 @@ package it.polito.tellmefirst.classify;
 
 public class Text {
 
-	private String text;
+	private final String text;
 
 	public Text(String intext) {
 		text = intext.replace("’", "'");
