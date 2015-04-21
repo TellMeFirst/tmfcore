@@ -144,4 +144,22 @@ public class SimpleSearcher {
 		LOG.debug("[getTypes] - END");
 		return result;
 	}
+
+    // Used by the Italian classifier
+    public static String getSameAsFromEngToIta(String engUri, SimpleSearcher italianSimpleSearcher) throws IOException {
+        LOG.debug("[getSameAsFromEngToIta] - BEGIN");
+        String result = "";
+        IndexSearcher indexSearcher = italianSimpleSearcher.getIndexSearcher();
+        Query q = new TermQuery(new Term("SAMEAS", engUri));
+        TopDocs hits = indexSearcher.search(q, 1);
+        if (hits.totalHits != 0) {
+            int docId = hits.scoreDocs[0].doc;
+            org.apache.lucene.document.Document doc = italianSimpleSearcher.getFullDocument(docId);
+            if (doc.getField("URI") != null){
+                result = doc.getField("URI").stringValue();
+            }
+        }
+        LOG.debug("[getSameAsFromEngToIta] - END");
+        return result;
+    }
 }
