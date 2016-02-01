@@ -4,6 +4,7 @@
 
 	<groupId>it.polito.tellmefirst</groupId>
 	<artifactId>tmfcore</artifactId>
+    <name>TellMeFirst Core</name>
 	<version>3.0.0.0</version>
 
 	<dependencies>

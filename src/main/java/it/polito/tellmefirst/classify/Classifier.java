@@ -281,7 +281,7 @@ public class Classifier {
 				// Note: in this case we use getImage() to get the
 				// image URL, rather than the "IMAGE" field, under the
 				// assumption that the english version of DBPedia is
-				// more rich.
+				// richer.
 				//
 				} else {
 					uri = doc.getField("SAMEAS").stringValue();

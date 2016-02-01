@@ -39,8 +39,7 @@ public class LuceneManager {
 			Version.LUCENE_36);
 	private final Directory luceneCorpusIndexDirectory;
 
-	// This attribute is taylored for TMF GUI:
-	private final int limitForQueryResult = 7;
+	private final int limitForQueryResult = 100;
 
 	public LuceneManager(Directory directory) throws IOException {
 		LOG.debug("[constructor] - BEGIN");
