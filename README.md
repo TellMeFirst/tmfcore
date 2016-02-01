@@ -1,4 +1,4 @@
-Tell Me First's core
+TellMeFirst's core
 ====================
 
 This repository contains the core of
